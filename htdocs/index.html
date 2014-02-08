@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title> Alice - Devkit </title>
+        <title> Alice - DevKit </title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,6 +21,10 @@
         <style type="text/css">
             body { 
                 padding-top: 70px; 
+            }
+            
+            h2 {
+                margin-top: 0;
             }
             
             .alice-view {
@@ -45,32 +49,32 @@
         <div class="navbar navbar-default navbar-fixed-top " role="navigation">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#">Alice - Devkit</a>
+                    <a class="navbar-brand" href="#">Alice - DevKit</a>
                 </div>
-                <div class="navbar-collapse collapse">
+                <div id="nav-main" class="navbar-collapse collapse">
                     <!-- Left Side -->
                     <ul class="nav navbar-nav">
                         <li class="active"> 
-                            <a href="#">About</a>
+                            <a id="main-about" href="#">About</a>
                         </li>
                         <li> 
-                            <a href="#">Entities</a>
+                            <a id="main-entities" href="#">Entities</a>
                         </li>
                         <li> 
-                            <a href="#">Stringtables</a> 
+                            <a id="main-stringtables" href="#">Stringtables</a> 
                         </li>
                         <li> 
-                            <a href="#">Recvprops</a> 
+                            <a id="main-recvprops" href="#">Recvprops</a> 
                         </li>
                         <li> 
-                            <a href="#">Sendprops</a> 
+                            <a id="main-sendprops" href="#">Sendprops</a> 
                         </li>
                     </ul>
                     <!-- Right Side -->
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <a id="toggle-control" href="#">
-                                <span class="glyphicon glyphicon-th"></span> Toggle Control
+                                <span class="glyphicon glyphicon-th"></span> Control
                             </a>
                         </li>
                         <li> 
@@ -169,11 +173,12 @@
             </div>
         
             <!-- Tabs for opened entities and stuff -->
-            <div class="panel panel-default">
+            <div id="content" class="panel panel-default">
                 <div class="panel-body">
                     <div id="tabs">
                         <!-- Nav tabs, see addTab -->
                         <ul class="nav nav-pills"></ul>
+                        <hr />
                         <!-- Tab panes, see addTab -->
                         <div class="tab-content"></div>
                     </div>
@@ -183,7 +188,78 @@
         
         <!-- Intro View -->
         <div class="alice-view" id="about-view">
-            
+            <div class="col-lg-5 salice-view">
+                <h4>Loading a Replay</h4>
+                <p>
+                    When you opened the DevKit it asked you to select a folder. This folder should contain the
+                    replays you want to parse. To open a replay, first click on the Control button at the top
+                    right hand side.
+                </p>
+                <p>
+                    The caret next to the open button shows you a list of replays to choose from. Opening a replay
+                    automatically closes the last opened replay and removes all content related to it.
+                </p>
+                
+                <h4>First Steps</h4>
+                <p>
+                    A replay is divided into a range of different messages. The first couple messages contain mostly
+                    data required to setting up send and receive tables, while later messages only contain entity
+                    updates.
+                </p>
+                <p>
+                    You can select the number of messages you want to parse in the control panel. As the parsing
+                    happens on the sever-side of the applications, parsing higher number of messages does only 
+                    increase the loading time by a very small amount.
+                </p>
+                <p>
+                    Once you have reached the first message containing picks and game data, the corresponding
+                    fields in the control panel will automatically show you the received data.
+                </p>
+                
+                <h4>Entities</h4>
+                <p>
+                    Entities contain everything you see in the game, such as heroes, creeps and the current
+                    cursor position. Entities by themselves are not unique and may contain data linking them 
+                    to other entities, for example Players and their selected heroes.
+                </p>
+                <p>
+                    They also contain the gamestate which includes properties like the score or the number of
+                    spectators.
+                </p>
+                
+                <h4>Stringtables</h4>
+                <p>
+                    Stringtables contain a wide-range of different data grouped unter different keys.
+                </p>
+                <p>
+                    The DevKit only shows data for a small range of stringtables as we haven't figure out
+                    how to parse most of them yet.
+                </p>
+                
+                <h4>Recvprops</h4>
+                <p>
+                    Displays a list of flattened sendtables.
+                </p>
+                <p>
+                    A sendtable is a list of property definitions for a given type, such as a hero or a player
+                    ressource. These properties need to be filtered and re-arranged in order to reflect the way
+                    the server presents them. The flattened sendtable or "Recvprop" is the correct representation
+                    of that.
+                </p>
+                <h4>Sendprops</h4>
+                <p>
+                    This is the unfiltered list of Sendprops. Only really interesting for debugging and 
+                    development purposes.
+                </p>
+            </div>
+            <div class="col-lg-6 salice-view">
+                <h4>About</h4>
+                <p>
+                    This development kit is part of <a href="https://github.com/AliceStats">Alice</a>.<br />
+                    Alice is FOSS software licensed under the 
+                    <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 License</a>.
+                </p>
+            </div>
         </div>
         
         <!-- Entities View -->
@@ -223,6 +299,7 @@
             
             // adds a new tab containing the specified html
             function addTab(title, content) {
+                $("#content").show();
                 var tabId = "tab" + composeCount++;
                 $('#tabs .nav-pills').append('<li><a href="#' + tabId + '"><button class="close closeTab" type="button" >×</button> '+title+' </a></li>');
                 $('#tabs .tab-content').append('<div class="tab-pane" id="' + tabId + '">'+content+'</div>');
@@ -235,8 +312,11 @@
                 $("#tabs").on("click", ".close", function () {
                     var tabContentId = $(this).parent().attr("href");
                     $(this).parent().parent().remove(); //remove li of tab
-                    $('#tabs a:last').tab('show'); // Select first tab
                     $(tabContentId).remove(); //remove respective tab content
+                    
+                    if ($("#tabs .tab-content").html() === "") {
+                        $("#content").hide();
+                    }
                 });
                 
                 // register onClick for all tabs
@@ -249,6 +329,17 @@
                 $("#toggle-control").click(function() {
                     $("#control").toggle(); 
                 });
+                
+                // add about tab
+                $("#main-about").click(function() {
+                    addTab("About", $("#about-view").html());
+                });
+                
+                // hide the control panel by default
+                $("#control").toggle(); 
+                
+                // add the about tab
+                addTab("About", $("#about-view").html());
             });
         </script>
     </body>
