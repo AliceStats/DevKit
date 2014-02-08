@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title> Alice - Devkit </title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+        
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <!-- Alice Devkit CSS -->
+        <style type="text/css">
+            body { 
+                padding-top: 70px; 
+            }
+            
+            .alice-view {
+                display: none;
+            }
+            
+            .nav-pills > li .close {
+			    margin: 2px 0 0 5px;
+			    font-size: 17px;
+			}
+			
+			.marginBottom {
+			    margin-bottom :1px !important;
+			}
+			
+			.operationDiv {
+			    padding:5px 10px 5px 5px;
+			}
+			
+			.operationDivWrapper {
+			    margin-top:-1px;
+			}
+			
+			.leftMenu {
+			    height :70%;
+			    background-color: #E6E6E6;
+			    border-right: 2px solid #BFBFBF;
+			}
+        </style>
+    
+        <!-- Top Navigation Bar -->
+        <div class="navbar navbar-default navbar-fixed-top " role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Alice - Devkit</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <!-- Left Side -->
+                    <ul class="nav navbar-nav">
+                        <li class="active"> 
+                            <a href="#">About</a>
+                        </li>
+                        <li> 
+                            <a href="#">Entities</a>
+                        </li>
+                        <li> 
+                            <a href="#">Stringtables</a> 
+                        </li>
+                        <li> 
+                            <a href="#">Recvprops</a> 
+                        </li>
+                        <li> 
+                            <a href="#">Sendprops</a> 
+                        </li>
+                    </ul>
+                    
+                    <!-- Right Side -->
+                    <ul class="nav navbar-nav navbar-right">
+                        <li> 
+                            <a href="https://github.com/AliceStats"> 
+                                <span class="glyphicon glyphicon-cloud-download"></span> Alice on Github
+                            </a> 
+                        </li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="container-fluid">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="tabs">
+                        <!-- Nav tabs, see addTab -->
+                        <ul class="nav nav-pills"></ul>
+                        <!-- Tab panes, see addTab -->
+                        <div class="tab-content"></div>
+                    </div>
+                </div>   
+             </div>
+        </div>
+        
+        <!-- Intro View -->
+        <div class="alice-view" id="about-view">
+            
+        </div>
+        
+        <!-- Entities View -->
+        <div class="alice-view" id="entities-view">
+            
+        </div>
+        
+        <!-- Stringtables View -->
+        <div class="alice-view" id="stringtables-view">
+            
+        </div>
+        
+        <!-- Recvprops View -->
+        <div class="alice-view" id="recvprops-view">
+            
+        </div>
+        
+        <!-- Sendprops View -->
+        <div class="alice-view" id="sendprops-view">
+            
+        </div>
+        
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="//code.jquery.com/jquery.js"></script>
+        <!-- Bootstrap Javascript -->
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <!-- Our own Javascript -->
+        <script type="text/javascript">
+            var composeCount = 0;   // number of tabs added to switch to the last created one
+            
+            // shows a specific tab
+            function switchToTab(tabId) {
+                $('#tabs a[href="#' + tabId + '"]').tab('show');
+            }
+            
+            // adds a new tab containing the specified html
+            function addTab(title, content) {
+                var tabId = "tab" + composeCount++;
+                $('#tabs .nav-pills').append('<li><a href="#' + tabId + '"><button class="close closeTab" type="button" >×</button> '+title+' </a></li>');
+                $('#tabs .tab-content').append('<div class="tab-pane" id="' + tabId + '">'+content+'</div>');
+                switchToTab(tabId);
+            }
+            
+            // initialize page
+            $(function () {
+                // register onClose for all tabs
+                $("#tabs").on("click", ".close", function () {
+                    var tabContentId = $(this).parent().attr("href");
+                    $(this).parent().parent().remove(); //remove li of tab
+                    $('#tabs a:last').tab('show'); // Select first tab
+                    $(tabContentId).remove(); //remove respective tab content
+                });
+                
+                // register onClick for all tabs
+                $("#tabs").on("click", "a", function (e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                });
+            });
+        </script>
+    </body>
+</html>
