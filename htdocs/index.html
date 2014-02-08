@@ -62,10 +62,10 @@
                             <a id="main-about" href="#">About</a>
                         </li>
                         <li> 
-                            <a id="main-entities" href="#">Entities</a>
+                            <a data-toggle="modal" data-target="#entityModal" id="main-entities" href="#">Entities</a>
                         </li>
                         <li> 
-                            <a id="main-stringtables" href="#">Stringtables</a> 
+                            <a data-toggle="modal" data-target="#stringtableModal" id="main-stringtables" href="#">Stringtables</a> 
                         </li>
                         <li> 
                             <a id="main-recvprops" href="#">Recvprops</a> 
@@ -279,6 +279,34 @@
             </div>
         </div>
         
+        <!-- Entities Modal -->
+        <div id="entities-modal">
+            <div class="modal fade" id="entityModal" tabindex="-1" role="dialog" aria-labelledby="entityModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="entityModalLabel">Entity List</h4>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Select entities below to load their content.</h6>
+                            <select size=20 multiple class="form-control">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Load</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Entities View -->
         <div class="alice-view" id="entities-view">
             <table class="table table-condensed table-condensed">
@@ -296,6 +324,39 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+        
+        <!-- Stringtables Modal -->
+        <div id="stringtables-modal">
+            <div class="modal fade" id="stringtableModal" tabindex="-1" role="dialog" aria-labelledby="stringtableModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="stringtableModalLabel">Stringtable List</h4>
+                        </div>
+                        <div class="modal-body">
+                            <h6>Select a stringtable from below to load its content.</h6>
+                            <select size=20 class="form-control">
+                                <optgroup label="baselineinstance">
+                                    <option>123</option>
+                                    <option>456</option>
+                                    <option>789</option>
+                                </optgroup>
+                                <optgroup label="baselineinstance2">
+                                    <option>123</option>
+                                    <option>456</option>
+                                    <option>789</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Load</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Stringtables View -->
