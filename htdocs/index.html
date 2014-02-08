@@ -32,7 +32,7 @@
             }
             
             .nav-pills > li .close {
-			    margin: 2px 0 0 5px;
+			    margin: 2px -2px 0 6px;
 			    font-size: 17px;
 			}
 			
@@ -43,6 +43,10 @@
 			.heroicons img {
 			    margin-top: 4px;
 			}
+			
+			.border {
+			    border-left: 1px solid #eee;
+			}
         </style>
     
         <!-- Top Navigation Bar -->
@@ -51,10 +55,10 @@
                 <div class="navbar-header">
                     <a class="navbar-brand" href="#">Alice - DevKit</a>
                 </div>
-                <div id="nav-main" class="navbar-collapse collapse">
+                <div id="nav-main">
                     <!-- Left Side -->
                     <ul class="nav navbar-nav">
-                        <li class="active"> 
+                        <li> 
                             <a id="main-about" href="#">About</a>
                         </li>
                         <li> 
@@ -84,7 +88,6 @@
                         </li>
                     </ul>
                 </div>
-                <!--/.nav-collapse -->
             </div>
         </div>
         
@@ -188,7 +191,7 @@
         
         <!-- Intro View -->
         <div class="alice-view" id="about-view">
-            <div class="col-lg-5 salice-view">
+            <div class="col-lg-5">
                 <h4>Loading a Replay</h4>
                 <p>
                     When you opened the DevKit it asked you to select a folder. This folder should contain the
@@ -252,29 +255,82 @@
                     development purposes.
                 </p>
             </div>
-            <div class="col-lg-6 salice-view">
+            <div class="col-lg-1">
+                &nbsp;
+            </div>
+            <div class="col-lg-6 border">
                 <h4>About</h4>
                 <p>
                     This development kit is part of <a href="https://github.com/AliceStats">Alice</a>.<br />
                     Alice is FOSS software licensed under the 
                     <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 License</a>.
                 </p>
+                <h4>3rd-Party Software</h4>
+                <p>
+                    This website uses the following 3rd-Party software:
+                    <ul>
+                        <li><a href="http://getbootstrap.com/">Twitter Bootstrap</a></li>
+                        <li><a href="http://www.jquery.com/">jQuery</a></li>
+                        <li><a href="http://handlebarsjs.com/">Handlebar JS</a></li>
+                        <li><a href="http://glyphicons.com/">Glyphicon Halfling Icons</a></li>
+                        <li><a href="http://www.dota2.com/">Dota 2 Minimap Icons</a></li>
+                    </ul>
+                </p>
             </div>
         </div>
         
         <!-- Entities View -->
         <div class="alice-view" id="entities-view">
-            
+            <table class="table table-condensed table-condensed">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Type</th><th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>m_vecSomething</td>
+                        <td>VectorXY</td>
+                        <td>[123|456]</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         
         <!-- Stringtables View -->
         <div class="alice-view" id="stringtables-view">
-            
+            <!-- Subjective to each template, need to implement -->
         </div>
         
         <!-- Recvprops View -->
         <div class="alice-view" id="recvprops-view">
+            <div class="panel-group" id="accordion">
             
+                <div class="panel panel-default">
+                    <!-- header -->
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#propertyone">
+                                Property #1
+                            </a>
+                        </h4>
+                    </div>
+                    
+                    <!-- content -->
+                    <div id="propertyone">
+                        <div class="panel-body">
+                            <div class="col-lg-4">
+                                Recvprop details
+                            </div>
+                            <div class="col-lg-8">
+                                Recvprop properties table
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
         </div>
         
         <!-- Sendprops View -->
@@ -301,7 +357,7 @@
             function addTab(title, content) {
                 $("#content").show();
                 var tabId = "tab" + composeCount++;
-                $('#tabs .nav-pills').append('<li><a href="#' + tabId + '"><button class="close closeTab" type="button" >×</button> '+title+' </a></li>');
+                $('#tabs .nav-pills').append('<li><a href="#' + tabId + '"><button class="close closeTab" type="button" >&times;</button> '+title+' </a></li>');
                 $('#tabs .tab-content').append('<div class="tab-pane" id="' + tabId + '">'+content+'</div>');
                 switchToTab(tabId);
             }
