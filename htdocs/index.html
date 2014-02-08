@@ -32,22 +32,12 @@
 			    font-size: 17px;
 			}
 			
-			.marginBottom {
-			    margin-bottom :1px !important;
+			.control-actions button {
+			    margin-right: 20px;    
 			}
 			
-			.operationDiv {
-			    padding:5px 10px 5px 5px;
-			}
-			
-			.operationDivWrapper {
-			    margin-top:-1px;
-			}
-			
-			.leftMenu {
-			    height :70%;
-			    background-color: #E6E6E6;
-			    border-right: 2px solid #BFBFBF;
+			.heroicons img {
+			    margin-top: 4px;
 			}
         </style>
     
@@ -78,6 +68,11 @@
                     </ul>
                     <!-- Right Side -->
                     <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a id="toggle-control" href="#">
+                                <span class="glyphicon glyphicon-th"></span> Toggle Control
+                            </a>
+                        </li>
                         <li> 
                             <a href="https://github.com/AliceStats"> 
                                 <span class="glyphicon glyphicon-cloud-download"></span> Alice on Github
@@ -92,14 +87,14 @@
         <!-- Content -->
         <div class="container-fluid">
             <!-- Control current replay -->
-            <div class="panel panel-default">
+            <div id="control" class="panel panel-default">
                 <div class="panel-body">
                     <div class="row">
                         <!-- Open a Replay -->
-                        <div class="col-lg-3">
+                        <div class="col-lg-4">
                             <div class="input-group">
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default" tabindex="-1">Open Replay</button>
+                                    <button type="button" class="btn btn-default" tabindex="-1">Open</button>
                                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">
                                         <span class="caret"></span>
                                         <span class="sr-only">Toggle Dropdown</span>
@@ -114,28 +109,39 @@
                             </div>
                         </div>
                         <!-- Parse X Messages -->
-                        <div class="col-lg-1">
+                        <div class="col-lg-2">
                             <div class="input-group">
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button">Parse</button>
                                 </span>
                                 <input type="text" class="form-control" placeholder="100">
-                                </div>
+                            </div>
                         </div>
+                        <!-- Reload / Export / Close replay -->
+                        <div class="control-actions col-lg-4">
+                            <button class="btn btn-default" type="button">Reload</button>
+                            <button class="btn btn-default" type="button">Export JSON</button>
+                            <button class="btn btn-default" type="button">Close</button>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
                         <!-- Current Message Count -->
                         <div class="col-lg-2">
                             <div class="input-group">
-                                <span class="input-group-addon">Count:</span>
+                                <span class="input-group-addon">Count</span>
                                 <input type="text" class="form-control" placeholder="0">
                             </div>
                         </div>
+                        
                         <!-- Current Game Time -->
                         <div class="col-lg-2">
                             <div class="input-group">
-                                <span class="input-group-addon">Time:</span>
+                                <span class="input-group-addon">Time</span>
                                 <input type="text" class="form-control" placeholder="00:00">
                             </div>
                         </div>
+                        
                         <!-- Score -->
                         <div class="col-lg-2">
                             <div class="input-group">
@@ -143,9 +149,20 @@
                                 <input type="text" class="form-control" placeholder="0 - 0">
                             </div>
                         </div>
-                        <!-- Icons of picked heroes -->
-                        <div class="col-lg-1">
                         
+                        <!-- Icons of picked heroes -->
+                        <div class="col-lg-4 heroicons">
+                            <img height="28" src="images/icons/abaddon.png" />
+                            <img height="28" src="images/icons/alchemist.png" />
+                            <img height="28" src="images/icons/antimage.png" />
+                            <img height="28" src="images/icons/chen.png" />
+                            <img height="28" src="images/icons/drow.png" />
+                            
+                            <img height="28" src="images/icons/enigma.png" />
+                            <img height="28" src="images/icons/pudge.png" />
+                            <img height="28" src="images/icons/kunkka.png" />
+                            <img height="28" src="images/icons/lina.png" />
+                            <img height="28" src="images/icons/zuus.png" />
                         </div>
                     </div>
                 </div>   
@@ -226,6 +243,11 @@
                 $("#tabs").on("click", "a", function (e) {
                     e.preventDefault();
                     $(this).tab('show');
+                });
+                
+                // toggle control board
+                $("#toggle-control").click(function() {
+                    $("#control").toggle(); 
                 });
             });
         </script>
