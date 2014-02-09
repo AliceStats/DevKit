@@ -15,7 +15,7 @@ namespace dota {
     }
     
     std::string retFail(std::string msg) {
-        return std::string("{\"success\":1, \"data\":\""+msg+"\"}");
+        return std::string("{\"success\":0, \"data\":\""+msg+"\"}");
     }
     
     http_reply http_request_handler_devkit::handle(http_request req) {
@@ -33,6 +33,7 @@ namespace dota {
             if (req.url.size() < 8)
                 return http_reply::getStock(http_reply::bad_request);
 
+            // get request method
             uint32_t method = 0;
             try {
                 method = boost::lexical_cast<uint32_t>(req.url.substr(5, 2));
@@ -40,16 +41,40 @@ namespace dota {
                 return http_reply::getStock(http_reply::bad_request);
             }
 
+            // get request session
+            uint32_t session;
             std::string sessionId = req.getCookie("devkit-session");
-            bool gotSession = !sessionId.empty();
+            if (sessionId.empty()) {
+                session = ++count;
+            } else {
+                try {
+                    session = boost::lexical_cast<uint32_t>(sessionId);
+                } catch (std::exception &e) {
+                    return http_reply::getStock(http_reply::bad_request);
+                }
+            }
+            
+            // check if sessions exists
+            sessionMutex.lock();
+            auto it = sessions.find(session);
+            if (it == sessions.end()) {
+                sessions[session] = {time(NULL), nullptr};
+            } else {
+                sessions[session].accessed = time(NULL);
+            }
+            sessionMutex.unlock();
 
             switch (method) {
                 case LIST:
                     r.body = methodList();
                     break;
                 case OPEN:
+                    r.body = methodOpen(req.url.substr(8), session);
+                    break;
                 case PARSE:
                 case CLOSE:
+                    r.body = methodClose(session);
+                    break;
                 case STRINGTABLES:
                 case STRINGTABLE:
                 case ENTITIES:
@@ -62,6 +87,7 @@ namespace dota {
                     break;
             }
             
+            r.fields.push_back({"Set-Cookie", std::string("devkit-session=")+std::to_string(session)});
             r.fields.push_back({"Content-Length", std::to_string(r.body.size())});
             r.fields.push_back({"Connection", "Close"});
         } else {
@@ -110,5 +136,45 @@ namespace dota {
         closedir(dir);
         
         return retOk(entries);
+    }
+    
+    std::string http_request_handler_devkit::methodOpen(std::string arg, uint32_t sId) {
+        std::lock_guard<std::mutex> mLock(sessionMutex);
+        
+        std::string file = replaydir+arg;
+        try {
+            if (sessions[sId].r != nullptr) {
+                auto *mon = sessions[sId].r;
+                (*mon)([](reader* r){
+                    delete r;
+                }).get(); // do this synchronous to keep a valid state
+                delete sessions[sId].r;
+            }
+        
+            sessions[sId].r = new monitor<reader*>(new reader(file));
+            return retOk(std::string("Replay Opened"));
+        } catch (std::exception &e) {
+            return retFail("Failed to open replay with exception: "+e.what());
+        }
+    }
+    
+    std::string http_request_handler_devkit::methodClose(uint32_t sId) {
+        std::lock_guard<std::mutex> mLock(sessionMutex);
+        auto* mon = sessions[sId].r;
+        
+        try {
+            if (mon) {
+                (*mon)([](reader* r){
+                    if (r)
+                        delete r;
+                }).get();
+                delete sessions[sId].r;
+                sessions[sId].r = nullptr;
+            }
+        } catch (std::exception &e) {
+            return retFail(std::string("Exception while closing: ")+e.what());
+        }
+        
+        return retOk(std::string("Replay Close"));
     }
 }

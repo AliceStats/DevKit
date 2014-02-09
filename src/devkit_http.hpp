@@ -25,14 +25,14 @@ namespace dota {
                 LIST         =  0, // list all replays available
                 OPEN         =  1, // open a specific replay
                 PARSE        =  2, // parse X messages
-                CLOSE        =  4, // close message
-                STRINGTABLES =  5, // get a list of all stringtables
-                STRINGTABLE  =  6, // get contents of a single table
-                ENTITIES     =  7, // get a list of all entities
-                ENTITY       =  8, // get contents of a single entity
-                STATUS       =  9, // returns match status
-                RECV         = 10, // returns recvprops
-                SEND         = 11  // returns sendprops
+                CLOSE        =  3, // close message
+                STRINGTABLES =  4, // get a list of all stringtables
+                STRINGTABLE  =  5, // get contents of a single table
+                ENTITIES     =  6, // get a list of all entities
+                ENTITY       =  7, // get contents of a single entity
+                STATUS       =  8, // returns match status
+                RECV         =  9, // returns recvprops
+                SEND         = 10  // returns sendprops
             };
 
             /** Struct for a devkit session */
@@ -40,11 +40,12 @@ namespace dota {
                 /** Last time session was accessed */
                 time_t accessed;
                 /** Replay reader */
-                monitor<reader> r;
+                monitor<reader*>* r;
             };
 
             /** Constructor, takes replay directory */
-            http_request_handler_devkit(std::string replayDirectory) : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory) { }
+            http_request_handler_devkit(std::string replayDirectory) 
+                : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory), count(0) { }
 
             /** Destructor */
             virtual ~http_request_handler_devkit() { }
@@ -63,8 +64,12 @@ namespace dota {
             /** mutex for locking / unlocking the session map */
             std::mutex sessionMutex;
             
-            /** Returns result of LIST-API call */
+            /** Returns result of LIST API call */
             std::string methodList();
+            /** Returns result of OPEN API call */
+            std::string methodOpen(std::string arg, uint32_t sId);
+            /** Returns result of CLOSE API call */
+            std::string methodClose(uint32_t sId);
     };
 }
 
