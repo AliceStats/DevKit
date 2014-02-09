@@ -102,6 +102,7 @@ SET ( DEVKIT_SOURCES
     src/http_connection.cpp
     src/http_mime_type.cpp
     src/http_reply.cpp
+    src/devkit_http.cpp
     src/devkit.cpp
 )
 
