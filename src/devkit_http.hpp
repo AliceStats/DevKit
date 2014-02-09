@@ -68,6 +68,8 @@ namespace dota {
             std::string methodList();
             /** Returns result of OPEN API call */
             std::string methodOpen(std::string arg, uint32_t sId);
+            /** Returns result of PARSE API call */
+            std::string methodParse(std::string arg, uint32_t sId);
             /** Returns result of CLOSE API call */
             std::string methodClose(uint32_t sId);
     };

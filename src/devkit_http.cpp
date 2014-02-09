@@ -72,6 +72,8 @@ namespace dota {
                     r.body = methodOpen(req.url.substr(8), session);
                     break;
                 case PARSE:
+                    r.body = methodParse(req.url.substr(8), session);
+                    break;
                 case CLOSE:
                     r.body = methodClose(session);
                     break;
@@ -147,14 +149,41 @@ namespace dota {
                 auto *mon = sessions[sId].r;
                 (*mon)([](reader* r){
                     delete r;
-                }).get(); // do this synchronous to keep a valid state
+                }).get(); // do this synchronously to keep a valid state
                 delete sessions[sId].r;
             }
         
             sessions[sId].r = new monitor<reader*>(new reader(file));
             return retOk(std::string("Replay Opened"));
         } catch (std::exception &e) {
-            return retFail("Failed to open replay with exception: "+e.what());
+            return retFail(std::string("Failed to open replay with exception: ")+e.what());
+        }
+    }
+    
+    std::string http_request_handler_devkit::methodParse(std::string arg, uint32_t sId) {
+        sessionMutex.lock();
+        auto* mon = sessions[sId].r;
+        sessionMutex.unlock();
+        
+        uint32_t num = 0;
+        
+        try {
+            if (!arg.empty())
+                num = boost::lexical_cast<uint32_t>(arg);
+        
+            if (mon) {
+                (*mon)([=](reader* r){
+                    for (uint32_t i = 0; i < num; ++i) {
+                        r->readMessage();
+                    }
+                });
+                
+                return retOk(std::string("Parsing..."));
+            } else {
+                return retFail("No replay opened");
+            }
+        } catch (std::exception &e) {
+            return retFail(std::string("Failed to parse replay with exception: ")+e.what());
         }
     }
     
@@ -167,7 +196,7 @@ namespace dota {
                 (*mon)([](reader* r){
                     if (r)
                         delete r;
-                }).get();
+                }).get(); // do this synchronously to keep a valid state
                 delete sessions[sId].r;
                 sessions[sId].r = nullptr;
             }
@@ -175,6 +204,6 @@ namespace dota {
             return retFail(std::string("Exception while closing: ")+e.what());
         }
         
-        return retOk(std::string("Replay Close"));
+        return retOk(std::string("Replay Closed"));
     }
 }
