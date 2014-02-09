@@ -15,7 +15,7 @@ namespace dota {
         /** Value of the field, e.g. Closed */
         std::string value;
     };
-    
+
     /** Reply struct */
     struct http_status {
         /** Header e.g. 200 ok */
@@ -23,10 +23,10 @@ namespace dota {
         /** Request body */
         std::string html;
     };
-    
+
     /** Response to a http request */
     class http_reply {
-        public:        
+        public:
             /** Status tupe */
             enum status_type {
                 ok = 200,
@@ -46,12 +46,12 @@ namespace dota {
                 bad_gateway = 502,
                 service_unavailable = 503
             } status = ok;
-            
+
             /** Headers to be included in reply */
             std::vector<http_field> fields;
             /** Body */
             std::string body = "";
-            
+
             /** Returns buffer of content */
             std::vector<boost::asio::const_buffer> asBuffer();
             /** Returns stock reply of status */

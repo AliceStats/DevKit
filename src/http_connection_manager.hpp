@@ -13,18 +13,18 @@ namespace dota {
                 connections.insert(p);
                 p->start();
             }
-            
+
             /** Stop the specified connection */
             inline void stop(connectionPtr p) {
                 connections.erase(p);
                 p->stop();
             }
-            
+
             /** Stop all connections */
             inline void shutdown() {
                 for (auto c : connections)
                     c->stop();
-                    
+
                 connections.clear();
             }
         private:

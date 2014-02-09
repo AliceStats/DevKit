@@ -11,13 +11,13 @@ namespace dota {
     class http_request_handler {
         public:
             /** Empty constructor */
-            http_request_handler() {}      
-            
+            http_request_handler() {}
+
             /** Empty virtual destructor */
-            virtual ~http_request_handler() { }   
-            
+            virtual ~http_request_handler() { }
+
             /** Handle method to be overloaded by definite handler */
-            virtual http_reply handle(http_request req) = 0;            
+            virtual http_reply handle(http_request req) = 0;
     };
 }
 

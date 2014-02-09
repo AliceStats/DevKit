@@ -7,7 +7,7 @@ namespace dota {
     http_connection::http_connection(
         boost::asio::ip::tcp::socket &&socket, http_connection_manager &m, http_request_handler *handler
     ) : socket(std::move(socket)), manager(m), handler(handler), buffer(), parser(), reply() { }
-            
+
     void http_connection::read() {
         auto self = shared_from_this(); // keeps connection open as long as the read takes
         socket.async_read_some(boost::asio::buffer(buffer), [this, self](boost::system::error_code e, std::size_t transferred) {
@@ -29,7 +29,7 @@ namespace dota {
             }
         });
     }
-            
+
     void http_connection::write() {
         auto self = shared_from_this(); // keeps connection open as long as the write rakes
         boost::asio::async_write(socket, reply.asBuffer(), [this, self](boost::system::error_code e, std::size_t) {
@@ -37,7 +37,7 @@ namespace dota {
                 boost::system::error_code ignored;
                 socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored);
             }
-            
+
             if (e != boost::asio::error::operation_aborted) {
                 manager.stop(shared_from_this());
             }

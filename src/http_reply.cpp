@@ -25,17 +25,17 @@ namespace dota {
             { http_reply::bad_gateway,           {"HTTP/1.0 502 Bad Gateway\r\n", "502"} },
             { http_reply::service_unavailable,   {"HTTP/1.0 503 Service Unavailable\r\n", "503"} }
         };
-        
+
         // key - value seperator
         const char separator[] = { ':', ' ' };
-        // newline 
+        // newline
         const char crlf[] = { '\r', '\n' };
     }
-    
+
     std::vector<boost::asio::const_buffer> http_reply::asBuffer() {
-        // Asio's buffer does not take ownership of the data, hence 
+        // Asio's buffer does not take ownership of the data, hence
         // the subnamespace containing crlf and seperator.
-        
+
         std::vector<boost::asio::const_buffer> buffers;
         buffers.push_back(boost::asio::buffer(detail::codes[status].header));
         for (auto &entry : fields) {
@@ -44,22 +44,22 @@ namespace dota {
             buffers.push_back(boost::asio::buffer(entry.value));
             buffers.push_back(boost::asio::buffer(detail::crlf));
         }
-        
+
         buffers.push_back(boost::asio::buffer(detail::crlf));
         buffers.push_back(boost::asio::buffer(body));
-        
+
         return buffers;
     }
-    
+
     http_reply http_reply::getStock(status_type status) {
         http_reply r;
-        
+
         r.status = status;
         r.body = detail::codes[status].html;
         r.fields.push_back({"Content-Length", std::to_string(r.body.size())});
         r.fields.push_back({"Content-Type", "text/html"});
         r.fields.push_back({"Connection", "Close"});
-        
+
         return r;
     }
-} 
+}
