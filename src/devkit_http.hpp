@@ -44,7 +44,7 @@ namespace dota {
             };
 
             /** Constructor, takes replay directory */
-            http_request_handler_devkit(std::string replayDirectory) 
+            http_request_handler_devkit(std::string replayDirectory)
                 : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory), count(0) { }
 
             /** Destructor */
@@ -63,7 +63,7 @@ namespace dota {
             std::unordered_map<uint32_t, devkit_session> sessions;
             /** mutex for locking / unlocking the session map */
             std::mutex sessionMutex;
-            
+
             /** Returns result of LIST API call */
             std::string methodList();
             /** Returns result of OPEN API call */
@@ -72,6 +72,10 @@ namespace dota {
             std::string methodParse(std::string arg, uint32_t sId);
             /** Returns result of CLOSE API call */
             std::string methodClose(uint32_t sId);
+            /** Returns result of STRINGTABLES API call */
+            std::string methodStringtables(uint32_t sId);
+            /** Returns result of ENTITIES API call */
+            std::string methodEntities(uint32_t sId);
     };
 }
 
