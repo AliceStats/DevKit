@@ -43,14 +43,14 @@ endif()
 IF ( CUSTOM_HTDOCS_PATH )
     SET ( DEVKIT_HTDOCS ${CUSTOM_HTDOCS_PATH} )
 ELSE ( CUSTOM_HTDOCS_PATH )
-    SET ( DEVKIT_HTDOCS ${CMAKE_INSTALL_PREFIX}/share/alice/htdocs} )
+    SET ( DEVKIT_HTDOCS ${CMAKE_INSTALL_PREFIX}/share/alice/htdocs )
 ENDIF ( CUSTOM_HTDOCS_PATH )
 
-#MESSAGE ( STATUS "Generating src/config.hpp" )
-#CONFIGURE_FILE (
-#    ${CMAKE_SOURCE_DIR}/src/config.hpp.in
-#    ${CMAKE_SOURCE_DIR}/src/config.hpp
-#)
+MESSAGE ( STATUS "Generating src/config.hpp" )
+CONFIGURE_FILE (
+    ${CMAKE_SOURCE_DIR}/src/config.hpp.in
+    ${CMAKE_SOURCE_DIR}/src/config.hpp
+)
 
 #------------------------------------------------------------
 # Include And Configure Libraries Used
