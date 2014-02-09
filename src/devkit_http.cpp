@@ -1,6 +1,23 @@
+#include <dirent.h>
+
+#include <boost/lexical_cast.hpp>
+
+#include "json.hpp"
 #include "devkit_http.hpp"
 
 namespace dota {
+    std::string retOk(json_type t) {
+        std::string result;
+        jsonToString v(result);
+        boost::apply_visitor( v, t );
+        
+        return std::string("{\"success\":1, \"data\":"+result+"}");
+    }
+    
+    std::string retFail(std::string msg) {
+        return std::string("{\"success\":1, \"data\":\""+msg+"\"}");
+    }
+    
     http_reply http_request_handler_devkit::handle(http_request req) {
         // sanitize our url
         if (req.url.empty() || (req.url[0] != '/') || (req.url.find("..") != std::string::npos) )
@@ -8,6 +25,7 @@ namespace dota {
 
         // reply object for this request
         http_reply r;
+        r.status = http_reply::ok;
 
         // check if this is an api or file request
         if (req.url.substr(1, 3) == "api") {
@@ -27,6 +45,8 @@ namespace dota {
 
             switch (method) {
                 case LIST:
+                    r.body = methodList();
+                    break;
                 case OPEN:
                 case PARSE:
                 case CLOSE:
@@ -41,8 +61,7 @@ namespace dota {
                     return http_reply::getStock(http_reply::bad_request);
                     break;
             }
-
-            r.body = "api";
+            
             r.fields.push_back({"Content-Length", std::to_string(r.body.size())});
             r.fields.push_back({"Connection", "Close"});
         } else {
@@ -55,8 +74,7 @@ namespace dota {
 
             if (!is)
                 return http_reply::getStock(http_reply::not_found);
-
-            r.status = http_reply::ok;
+                
             char buf[4096];
 
             while (is.read(buf, sizeof(buf)).gcount() > 0)
@@ -70,5 +88,27 @@ namespace dota {
         }
 
         return r;
+    }
+    
+    std::string http_request_handler_devkit::methodList() {
+        DIR *dir;
+        struct dirent *entry;
+        std::vector<json_type> entries;
+        
+        if ((dir = opendir(replaydir.c_str())) == NULL) 
+            return retFail("Failed to open directory");
+        
+        while ((entry = readdir (dir)) != NULL) {
+            std::string e(entry->d_name);
+            
+            if (e.substr(0,1).compare(".") == 0)
+                continue;
+                
+            entries.push_back(std::move(e));
+        }
+        
+        closedir(dir);
+        
+        return retOk(entries);
     }
 }

@@ -4,10 +4,7 @@
 #include <unordered_map>
 #include <atomic>
 #include <mutex>
-
 #include <ctime>
-
-#include <boost/lexical_cast.hpp>
 
 #include <alice/reader.hpp>
 #include <alice/monitor.hpp>
@@ -65,6 +62,9 @@ namespace dota {
             std::unordered_map<uint32_t, devkit_session> sessions;
             /** mutex for locking / unlocking the session map */
             std::mutex sessionMutex;
+            
+            /** Returns result of LIST-API call */
+            std::string methodList();
     };
 }
 
