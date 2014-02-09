@@ -1,0 +1,7 @@
+#ifndef _DEVKIT_CONFIG_HPP_
+#define _DEVKIT_CONFIG_HPP_
+
+/// Path to the htdocs folder of devkit
+#define DEVKIT_HTDOCS "@HTDOCS_PATH@"
+
+#endif // _DEVKIT_CONFIG_HPP_
