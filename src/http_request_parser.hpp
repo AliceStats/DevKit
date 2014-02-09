@@ -19,8 +19,8 @@ namespace dota {
             } result;
 
             /** Constructor initializing the underlying C parser */
-            http_parser_interface() : settings(), parser(), req(), parsingValue(false), field(""),
-                value(""), result(indeterminate)
+            http_parser_interface() : result(indeterminate), settings(), parser(), req(), parsingValue(false), field(""),
+                value("")
             {
                 // set callback functions
                 settings.on_message_begin = 0;
