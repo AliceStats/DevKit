@@ -78,6 +78,8 @@ namespace dota {
             std::string methodEntities(uint32_t sId);
             /** Returns result of ENTITY API call */
             std::string methodEntity(std::string arg, uint32_t sId);
+            /** Returns result SEND API call */
+            std::string methodSend(uint32_t sId);
     };
 }
 

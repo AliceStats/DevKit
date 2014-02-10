@@ -83,6 +83,8 @@ namespace dota {
                     r.body = methodStringtables(session);
                     break;
                 case STRINGTABLE:
+                    // we need to make those available using a javascript HEX editor, but at this moment it's overkill
+                    r.body = std::string("{\"success\":0, \"data\":\"Stringtable loading is not supported at the moment\"");
                     break;
                 case ENTITIES:
                     r.body = methodEntities(session);
@@ -95,6 +97,7 @@ namespace dota {
                 case RECV:
                     break;
                 case SEND:
+                    r.body = methodSend(session);
                     break;
                 default:
                     return http_reply::getStock(http_reply::bad_request);
@@ -306,8 +309,6 @@ namespace dota {
                             entry["value"] = it.second.asString();
                             entry["type"] = it.second.getType();
                             entry["flags"] = flagset.to_string();
-                            entry["lowval"] = p->getLowVal();
-                            entry["highval"] = p->getHighVal();
 
                             entries.push_back(entry);
                         }
@@ -322,6 +323,51 @@ namespace dota {
             }
         } catch (std::exception &e) {
             return retFail(std::string("Failed to get entity with exception: ")+e.what());
+        }
+    }
+
+    std::string http_request_handler_devkit::methodSend(uint32_t sId) {
+        sessionMutex.lock();
+        auto* mon = sessions[sId].r;
+        sessionMutex.unlock();
+
+        try {
+            if (mon) {
+                auto ret = (*mon)([=](reader* r){
+                    std::unordered_map<std::string, json_type> entries;
+                    gamestate::sendtableMap &tbls = r->getState().getSendtables();
+
+                    for (auto &it : tbls) {
+                        std::vector<json_type> props;
+                        for (auto &t : it.value) {
+                            std::unordered_map<std::string, json_type> entry;
+                            std::bitset<32> flagset(t.value->getFlags());
+
+                            entry["type"] = t.value->getType();
+                            entry["name"] = t.value->getName();
+                            entry["netname"] = t.value->getNetname();
+                            entry["flags"] = flagset.to_string();
+                            entry["priority"] = t.value->getPriority();
+                            entry["classname"] = t.value->getClassname();
+                            entry["elements"] = t.value->getElements();
+                            entry["min"] = t.value->getLowVal();
+                            entry["max"] = t.value->getHighVal();
+                            entry["bits"] = t.value->getBits();
+
+                            props.push_back(entry);
+                        }
+                        entries[it.value.getName()] = props;
+                    }
+
+                    return entries;
+                });
+
+                return retOk(ret.get());
+            } else {
+                return retFail("No replay opened");
+            }
+        } catch (std::exception &e) {
+            return retFail(std::string("Failed to get sendtables with exception: ")+e.what());
         }
     }
 }
