@@ -222,11 +222,10 @@ namespace dota {
         auto* mon = sessions[sId].r;
         sessionMutex.unlock();
 
-        std::unordered_map<std::string, json_type> entries;
-
         try {
             if (mon) {
-                (*mon)([&](reader* r){
+                auto ent = (*mon)([&](reader* r){
+                    std::unordered_map<std::string, json_type> entries;
                     gamestate::stringtableMap &tables = r->getState().getStringtables();
                     for (auto &tbl : tables) {
                         std::vector<json_type> sub;
@@ -237,9 +236,10 @@ namespace dota {
 
                         entries[tbl.key] = sub;
                     }
-                }).get();
+                    return entries;
+                });
 
-                return retOk(entries);
+                return retOk(ent.get());
             } else {
                 return retFail("No replay opened");
             }
@@ -253,24 +253,25 @@ namespace dota {
         auto* mon = sessions[sId].r;
         sessionMutex.unlock();
 
-        std::unordered_map<std::string, json_type> entries;
-
         try {
             if (mon) {
-                (*mon)([&](reader* r){
+                auto ent = (*mon)([](reader* r){
+                    std::unordered_map<std::string, json_type> entries;
                     gamestate::entityMap &entities = r->getState().getEntities();
 
                     for (auto &ent : entities) {
                         entries[std::to_string(ent.first)] = ent.second->getClassName();
                     }
-                }).get();
 
-                return retOk(entries);
+                    return entries;
+                });
+
+                return retOk(ent.get());
             } else {
                 return retFail("No replay opened");
             }
         } catch (std::exception &e) {
-            return retFail(std::string("Failed to parse replay with exception: ")+e.what());
+            return retFail(std::string("Failed to gather entities with exception: ")+e.what());
         }
     }
 
@@ -312,7 +313,7 @@ namespace dota {
                 return retFail("No replay opened");
             }
         } catch (std::exception &e) {
-            return retFail(std::string("Failed to parse replay with exception: ")+e.what());
+            return retFail(std::string("Failed to get entity with exception: ")+e.what());
         }
     }
 }
