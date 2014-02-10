@@ -1,3 +1,4 @@
+#include <bitset>
 #include <dirent.h>
 
 #include <boost/lexical_cast.hpp>
@@ -298,9 +299,16 @@ namespace dota {
                     if (e != entities.end()) {
                         for (auto it : *(e->second)) {
                             std::unordered_map<std::string, json_type> entry;
+                            sendprop *p = it.second.getSendprop();
+                            std::bitset<32> flagset(p->getFlags());
+
                             entry["name"] = it.second.getName();
                             entry["value"] = it.second.asString();
                             entry["type"] = it.second.getType();
+                            entry["flags"] = flagset.to_string();
+                            entry["lowval"] = p->getLowVal();
+                            entry["highval"] = p->getHighVal();
+
                             entries.push_back(entry);
                         }
                     }
