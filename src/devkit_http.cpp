@@ -46,6 +46,7 @@ namespace dota {
             std::string sessionId = req.getCookie("devkit-session");
             if (sessionId.empty()) {
                 session = ++count;
+                r.fields.push_back({"Set-Cookie", std::string("devkit-session=")+std::to_string(session)+"; Path=/; HttpOnly;"});
             } else {
                 try {
                     session = boost::lexical_cast<uint32_t>(sessionId);
@@ -86,6 +87,7 @@ namespace dota {
                     r.body = methodEntities(session);
                     break;
                 case ENTITY:
+                    r.body = methodEntity(req.url.substr(8), session);
                     break;
                 case STATUS:
                     break;
@@ -98,7 +100,6 @@ namespace dota {
                     break;
             }
 
-            r.fields.push_back({"Set-Cookie", std::string("devkit-session=")+std::to_string(session)});
             r.fields.push_back({"Content-Length", std::to_string(r.body.size())});
             r.fields.push_back({"Connection", "Close"});
         } else {
@@ -169,6 +170,53 @@ namespace dota {
         }
     }
 
+    std::string http_request_handler_devkit::methodParse(std::string arg, uint32_t sId) {
+        sessionMutex.lock();
+        auto* mon = sessions[sId].r;
+        sessionMutex.unlock();
+
+        uint32_t num = 0;
+
+        try {
+            if (!arg.empty())
+                num = boost::lexical_cast<uint32_t>(arg);
+
+            if (mon) {
+                (*mon)([=](reader* r){
+                    for (uint32_t i = 0; i < num; ++i) {
+                        r->readMessage();
+                    }
+                });
+
+                return retOk(std::string("Parsing..."));
+            } else {
+                return retFail("No replay opened");
+            }
+        } catch (std::exception &e) {
+            return retFail(std::string("Failed to parse replay with exception: ")+e.what());
+        }
+    }
+
+    std::string http_request_handler_devkit::methodClose(uint32_t sId) {
+        std::lock_guard<std::mutex> mLock(sessionMutex);
+        auto* mon = sessions[sId].r;
+
+        try {
+            if (mon) {
+                (*mon)([](reader* r){
+                    if (r)
+                        delete r;
+                }).get(); // do this synchronously to keep a valid state
+                delete sessions[sId].r;
+                sessions[sId].r = nullptr;
+            }
+        } catch (std::exception &e) {
+            return retFail(std::string("Exception while closing: ")+e.what());
+        }
+
+        return retOk(std::string("Replay Closed"));
+    }
+
     std::string http_request_handler_devkit::methodStringtables(uint32_t sId) {
         sessionMutex.lock();
         auto* mon = sessions[sId].r;
@@ -226,7 +274,7 @@ namespace dota {
         }
     }
 
-    std::string http_request_handler_devkit::methodParse(std::string arg, uint32_t sId) {
+    std::string http_request_handler_devkit::methodEntity(std::string arg, uint32_t sId) {
         sessionMutex.lock();
         auto* mon = sessions[sId].r;
         sessionMutex.unlock();
@@ -236,40 +284,35 @@ namespace dota {
         try {
             if (!arg.empty())
                 num = boost::lexical_cast<uint32_t>(arg);
+            else
+                return retFail("No entity specified");
 
             if (mon) {
-                (*mon)([=](reader* r){
-                    for (uint32_t i = 0; i < num; ++i) {
-                        r->readMessage();
+                auto ret = (*mon)([=](reader* r){
+                    std::vector<json_type> entries;
+                    gamestate::entityMap &entities = r->getState().getEntities();
+
+                    auto e = entities.find(num);
+
+                    if (e != entities.end()) {
+                        for (auto it : *(e->second)) {
+                            std::unordered_map<std::string, json_type> entry;
+                            entry["name"] = it.second.getName();
+                            entry["value"] = it.second.asString();
+                            entry["type"] = it.second.getType();
+                            entries.push_back(entry);
+                        }
                     }
+
+                    return entries;
                 });
 
-                return retOk(std::string("Parsing..."));
+                return retOk(ret.get());
             } else {
                 return retFail("No replay opened");
             }
         } catch (std::exception &e) {
             return retFail(std::string("Failed to parse replay with exception: ")+e.what());
         }
-    }
-
-    std::string http_request_handler_devkit::methodClose(uint32_t sId) {
-        std::lock_guard<std::mutex> mLock(sessionMutex);
-        auto* mon = sessions[sId].r;
-
-        try {
-            if (mon) {
-                (*mon)([](reader* r){
-                    if (r)
-                        delete r;
-                }).get(); // do this synchronously to keep a valid state
-                delete sessions[sId].r;
-                sessions[sId].r = nullptr;
-            }
-        } catch (std::exception &e) {
-            return retFail(std::string("Exception while closing: ")+e.what());
-        }
-
-        return retOk(std::string("Replay Closed"));
     }
 }

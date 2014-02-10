@@ -76,6 +76,8 @@ namespace dota {
             std::string methodStringtables(uint32_t sId);
             /** Returns result of ENTITIES API call */
             std::string methodEntities(uint32_t sId);
+            /** Returns result of ENTITY API call */
+            std::string methodEntity(std::string arg, uint32_t sId);
     };
 }
 
