@@ -35,12 +35,27 @@ namespace dota {
                 SEND         = 10  // returns sendprops
             };
 
+            /** Contains values returnes by the STATUS Api call */
+            struct game_status {
+                /** Default constructor for member initialization */
+                game_status() : ticksParsed(0), clock(0), heroes{0,0,0,0,0,0,0,0} {}
+
+                /** Number of ticks parsed until now */
+                uint32_t ticksParsed;
+                /** In-Game time */
+                uint32_t clock;
+                /** ID's of heroes picked */
+                uint32_t heroes[8];
+            };
+
             /** Struct for a devkit session */
             struct devkit_session {
                 /** Last time session was accessed */
                 time_t accessed;
                 /** Replay reader */
-                monitor<reader*>* r;
+                reader* r;
+                /** Status struct */
+                game_status status;
             };
 
             /** Constructor, takes replay directory */
@@ -60,9 +75,12 @@ namespace dota {
             /** session count */
             std::atomic<uint32_t> count;
             /** session map */
-            std::unordered_map<uint32_t, devkit_session> sessions;
+            std::unordered_map<uint32_t, monitor<devkit_session>*> sessions;
             /** mutex for locking / unlocking the session map */
             std::mutex sessionMutex;
+
+            /** Returns session if it exists */
+            monitor<devkit_session>* getSession(uint32_t id);
 
             /** Returns result of LIST API call */
             std::string methodList();
@@ -80,6 +98,8 @@ namespace dota {
             std::string methodEntity(std::string arg, uint32_t sId);
             /** Returns result SEND API call */
             std::string methodSend(uint32_t sId);
+            /** Returns result RECV API call */
+            std::string methodRecv(uint32_t sId);
     };
 }
 

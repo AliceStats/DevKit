@@ -7,6 +7,7 @@
 #include "devkit_http.hpp"
 
 namespace dota {
+    /** Returns json string of succesful request */
     std::string retOk(json_type t) {
         std::string result;
         jsonToString v(result);
@@ -15,6 +16,7 @@ namespace dota {
         return std::string("{\"success\":1, \"data\":"+result+"}");
     }
 
+    /** Returns json string of unseccesful request */
     std::string retFail(std::string msg) {
         return std::string("{\"success\":0, \"data\":\""+msg+"\"}");
     }
@@ -60,9 +62,11 @@ namespace dota {
             sessionMutex.lock();
             auto it = sessions.find(session);
             if (it == sessions.end()) {
-                sessions[session] = {time(NULL), nullptr};
+                sessions[session] = new monitor<devkit_session>( devkit_session{time(NULL), nullptr, {}} );
             } else {
-                sessions[session].accessed = time(NULL);
+                (*it->second)([](devkit_session &s){
+                    s.accessed = time(NULL);
+                });
             }
             sessionMutex.unlock();
 
@@ -95,6 +99,7 @@ namespace dota {
                 case STATUS:
                     break;
                 case RECV:
+                    r.body = methodRecv(session);
                     break;
                 case SEND:
                     r.body = methodSend(session);
@@ -132,6 +137,16 @@ namespace dota {
         return r;
     }
 
+    monitor<http_request_handler_devkit::devkit_session>* http_request_handler_devkit::getSession(uint32_t id) {
+        std::lock_guard<std::mutex> mLock(sessionMutex);
+
+        auto it = sessions.find(id);
+        if (it == sessions.end())
+            return nullptr; // just return null in case we don't have the session
+
+        return it->second;
+    }
+
     std::string http_request_handler_devkit::methodList() {
         DIR *dir;
         struct dirent *entry;
@@ -143,6 +158,7 @@ namespace dota {
         while ((entry = readdir (dir)) != NULL) {
             std::string e(entry->d_name);
 
+            // don't add the current and prev dir
             if (e.substr(0,1).compare(".") == 0)
                 continue;
 
@@ -155,19 +171,24 @@ namespace dota {
     }
 
     std::string http_request_handler_devkit::methodOpen(std::string arg, uint32_t sId) {
-        std::lock_guard<std::mutex> mLock(sessionMutex);
-
+        // replay file
         std::string file = replaydir+arg;
-        try {
-            if (sessions[sId].r != nullptr) {
-                auto *mon = sessions[sId].r;
-                (*mon)([](reader* r){
-                    delete r;
-                }).get(); // do this synchronously to keep a valid state
-                delete sessions[sId].r;
-            }
 
-            sessions[sId].r = new monitor<reader*>(new reader(file));
+        // session
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
+
+        try {
+            // open a new replay
+            (*session)([=](devkit_session &s) {
+                if (s.r)
+                    delete s.r;
+
+                s.r = new reader(file);
+                s.status = game_status(); // reset current status
+            });
+
             return retOk(std::string("Replay Opened"));
         } catch (std::exception &e) {
             return retFail(std::string("Failed to open replay with exception: ")+e.what());
@@ -175,199 +196,245 @@ namespace dota {
     }
 
     std::string http_request_handler_devkit::methodParse(std::string arg, uint32_t sId) {
-        sessionMutex.lock();
-        auto* mon = sessions[sId].r;
-        sessionMutex.unlock();
-
+        // number of entities to parse
         uint32_t num = 0;
 
         try {
             if (!arg.empty())
                 num = boost::lexical_cast<uint32_t>(arg);
 
-            if (mon) {
-                (*mon)([=](reader* r){
-                    for (uint32_t i = 0; i < num; ++i) {
-                        r->readMessage();
-                    }
-                });
+            auto session = getSession(sId);
+            if (!session)
+                return retFail(std::string("No session active"));
 
-                return retOk(std::string("Parsing..."));
-            } else {
-                return retFail("No replay opened");
-            }
+            (*session)([=](devkit_session &s) {
+                // don't parse if there is no reader
+                if (s.r) {
+                    for (uint32_t i = 0; i < num; ++i) {
+                        s.r->readMessage();
+                    }
+                }
+            });
+
+            return retOk(std::string("Parsing..."));
         } catch (std::exception &e) {
             return retFail(std::string("Failed to parse replay with exception: ")+e.what());
         }
     }
 
     std::string http_request_handler_devkit::methodClose(uint32_t sId) {
-        std::lock_guard<std::mutex> mLock(sessionMutex);
-        auto* mon = sessions[sId].r;
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
 
         try {
-            if (mon) {
-                (*mon)([](reader* r){
-                    if (r)
-                        delete r;
-                }).get(); // do this synchronously to keep a valid state
-                delete sessions[sId].r;
-                sessions[sId].r = nullptr;
-            }
-        } catch (std::exception &e) {
-            return retFail(std::string("Exception while closing: ")+e.what());
-        }
+            (*session)([=](devkit_session &s) {
+                if (s.r) {
+                    delete s.r;
+                    s.r = nullptr;
+                }
+            });
 
-        return retOk(std::string("Replay Closed"));
+            return retOk(std::string("Replay Closed"));
+        } catch (std::exception &e) {
+            return retFail(std::string("Failed to close replay with exception: ")+e.what());
+        }
     }
 
     std::string http_request_handler_devkit::methodStringtables(uint32_t sId) {
-        sessionMutex.lock();
-        auto* mon = sessions[sId].r;
-        sessionMutex.unlock();
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
 
         try {
-            if (mon) {
-                auto ent = (*mon)([&](reader* r){
-                    std::unordered_map<std::string, json_type> entries;
-                    gamestate::stringtableMap &tables = r->getState().getStringtables();
-                    for (auto &tbl : tables) {
-                        std::vector<json_type> sub;
+            auto ent = (*session)([=](devkit_session &s) {
+                std::unordered_map<std::string, json_type> entries;
 
-                        for (auto &s : tbl.value) {
-                            sub.push_back(s.key);
-                        }
-
-                        entries[tbl.key] = sub;
-                    }
+                // if there is no reader, this function returns an empty set
+                if (!s.r)
                     return entries;
-                });
 
-                return retOk(ent.get());
-            } else {
-                return retFail("No replay opened");
-            }
+                gamestate::stringtableMap &tables = s.r->getState().getStringtables();
+                for (auto &tbl : tables) {
+                    std::vector<json_type> sub;
+
+                    for (auto &s : tbl.value) {
+                        sub.push_back(s.key);
+                    }
+
+                    entries[tbl.key] = sub;
+                }
+
+                return entries;
+            });
+
+            return retOk(ent.get());
         } catch (std::exception &e) {
             return retFail(std::string("Failed to parse replay with exception: ")+e.what());
         }
     }
 
     std::string http_request_handler_devkit::methodEntities(uint32_t sId) {
-        sessionMutex.lock();
-        auto* mon = sessions[sId].r;
-        sessionMutex.unlock();
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
 
         try {
-            if (mon) {
-                auto ent = (*mon)([](reader* r){
-                    std::unordered_map<std::string, json_type> entries;
-                    gamestate::entityMap &entities = r->getState().getEntities();
+            auto ent = (*session)([=](devkit_session &s) {
+                std::unordered_map<std::string, json_type> entries;
 
-                    for (auto &ent : entities) {
-                        entries[std::to_string(ent.first)] = ent.second->getClassName();
-                    }
-
+                // returns an empty set if no replay is opened
+                if (!s.r)
                     return entries;
-                });
 
-                return retOk(ent.get());
-            } else {
-                return retFail("No replay opened");
-            }
+                gamestate::entityMap &entities = s.r->getState().getEntities();
+                for (auto &ent : entities) {
+                    entries[std::to_string(ent.first)] = ent.second->getClassName();
+                }
+
+                return entries;
+            });
+
+            return retOk(ent.get());
         } catch (std::exception &e) {
             return retFail(std::string("Failed to gather entities with exception: ")+e.what());
         }
     }
 
     std::string http_request_handler_devkit::methodEntity(std::string arg, uint32_t sId) {
-        sessionMutex.lock();
-        auto* mon = sessions[sId].r;
-        sessionMutex.unlock();
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
 
-        uint32_t num = 0;
+        // ID of entity to get
+        uint32_t id = 0;
 
         try {
             if (!arg.empty())
-                num = boost::lexical_cast<uint32_t>(arg);
+                id = boost::lexical_cast<uint32_t>(arg);
             else
                 return retFail("No entity specified");
 
-            if (mon) {
-                auto ret = (*mon)([=](reader* r){
-                    std::vector<json_type> entries;
-                    gamestate::entityMap &entities = r->getState().getEntities();
+            auto ret = (*session)([=](devkit_session &s) {
+                std::vector<json_type> entries;
 
-                    auto e = entities.find(num);
-
-                    if (e != entities.end()) {
-                        for (auto it : *(e->second)) {
-                            std::unordered_map<std::string, json_type> entry;
-                            sendprop *p = it.second.getSendprop();
-                            std::bitset<32> flagset(p->getFlags());
-
-                            entry["name"] = it.second.getName();
-                            entry["value"] = it.second.asString();
-                            entry["type"] = it.second.getType();
-                            entry["flags"] = flagset.to_string();
-
-                            entries.push_back(entry);
-                        }
-                    }
-
+                if (!s.r)
                     return entries;
-                });
 
-                return retOk(ret.get());
-            } else {
-                return retFail("No replay opened");
-            }
+                gamestate::entityMap &entities = s.r->getState().getEntities();
+
+                auto e = entities.find(id);
+                if (e != entities.end()) {
+                    for (auto it : *(e->second)) {
+                        std::unordered_map<std::string, json_type> entry;
+                        sendprop *p = it.second.getSendprop();
+                        std::bitset<32> flagset(p->getFlags());
+
+                        entry["name"] = it.second.getName();
+                        entry["value"] = it.second.asString();
+                        entry["type"] = it.second.getType();
+                        entry["flags"] = flagset.to_string();
+
+                        entries.push_back(entry);
+                    }
+                }
+
+                return entries;
+            });
+
+            return retOk(ret.get());
         } catch (std::exception &e) {
             return retFail(std::string("Failed to get entity with exception: ")+e.what());
         }
     }
 
     std::string http_request_handler_devkit::methodSend(uint32_t sId) {
-        sessionMutex.lock();
-        auto* mon = sessions[sId].r;
-        sessionMutex.unlock();
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
 
         try {
-            if (mon) {
-                auto ret = (*mon)([=](reader* r){
-                    std::unordered_map<std::string, json_type> entries;
-                    gamestate::sendtableMap &tbls = r->getState().getSendtables();
+            auto ret = (*session)([=](devkit_session &s) {
+                std::unordered_map<std::string, json_type> entries;
 
-                    for (auto &it : tbls) {
-                        std::vector<json_type> props;
-                        for (auto &t : it.value) {
-                            std::unordered_map<std::string, json_type> entry;
-                            std::bitset<32> flagset(t.value->getFlags());
-
-                            entry["type"] = t.value->getType();
-                            entry["name"] = t.value->getName();
-                            entry["netname"] = t.value->getNetname();
-                            entry["flags"] = flagset.to_string();
-                            entry["priority"] = t.value->getPriority();
-                            entry["classname"] = t.value->getClassname();
-                            entry["elements"] = t.value->getElements();
-                            entry["min"] = t.value->getLowVal();
-                            entry["max"] = t.value->getHighVal();
-                            entry["bits"] = t.value->getBits();
-
-                            props.push_back(entry);
-                        }
-                        entries[it.value.getName()] = props;
-                    }
-
+                if (!s.r)
                     return entries;
-                });
 
-                return retOk(ret.get());
-            } else {
-                return retFail("No replay opened");
-            }
+                gamestate::sendtableMap &tbls = s.r->getState().getSendtables();
+
+                for (auto &it : tbls) {
+                    std::vector<json_type> props;
+                    for (auto &t : it.value) {
+                        std::unordered_map<std::string, json_type> entry;
+                        std::bitset<32> flagset(t.value->getFlags());
+
+                        entry["type"] = t.value->getType();
+                        entry["name"] = t.value->getName();
+                        entry["netname"] = t.value->getNetname();
+                        entry["flags"] = flagset.to_string();
+                        entry["priority"] = t.value->getPriority();
+                        entry["classname"] = t.value->getClassname();
+                        entry["elements"] = t.value->getElements();
+                        entry["min"] = t.value->getLowVal();
+                        entry["max"] = t.value->getHighVal();
+                        entry["bits"] = t.value->getBits();
+
+                        props.push_back(entry);
+                    }
+                    entries[it.value.getName()] = props;
+                }
+
+                return entries;
+            });
+
+            return retOk(ret.get());
         } catch (std::exception &e) {
             return retFail(std::string("Failed to get sendtables with exception: ")+e.what());
+        }
+    }
+
+    std::string http_request_handler_devkit::methodRecv(uint32_t sId) {
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
+
+        try {
+            auto ret = (*session)([=](devkit_session &s) {
+                std::unordered_map<std::string, json_type> entries;
+
+                if (!s.r)
+                    return entries;
+
+                gamestate::flatMap &tbls = s.r->getState().getFlattables();
+
+                for (auto &it : tbls) {
+                    std::vector<json_type> props;
+                    for (auto &t : it.second.properties) {
+                        std::unordered_map<std::string, json_type> entry;
+                        std::bitset<32> flagset(t->getFlags());
+
+                        entry["type"] = t->getType();
+                        entry["name"] = t->getName();
+                        entry["netname"] = t->getNetname();
+                        entry["flags"] = flagset.to_string();
+                        entry["priority"] = t->getPriority();
+                        entry["classname"] = t->getClassname();
+                        entry["elements"] = t->getElements();
+                        entry["min"] = t->getLowVal();
+                        entry["max"] = t->getHighVal();
+                        entry["bits"] = t->getBits();
+
+                        props.push_back(entry);
+                    }
+                    entries[it.second.name] = props;
+                }
+
+                return entries;
+            });
+
+            return retOk(ret.get());
+        } catch (std::exception &e) {
+            return retFail(std::string("Failed to get recvtables with exception: ")+e.what());
         }
     }
 }
