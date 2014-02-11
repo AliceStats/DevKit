@@ -87,7 +87,7 @@ namespace dota {
                     r.body = methodStringtables(session);
                     break;
                 case STRINGTABLE:
-                    // we need to make those available using a javascript HEX editor, but at this moment it's overkill
+                    // we need to make those available using a javascript HEX editor, but at this point it's overkill
                     r.body = std::string("{\"success\":0, \"data\":\"Stringtable loading is not supported at the moment\"");
                     break;
                 case ENTITIES:
@@ -97,6 +97,7 @@ namespace dota {
                     r.body = methodEntity(req.url.substr(8), session);
                     break;
                 case STATUS:
+                    r.body = methodStatus(session);
                     break;
                 case RECV:
                     r.body = methodRecv(session);
@@ -345,6 +346,31 @@ namespace dota {
             return retOk(ret.get());
         } catch (std::exception &e) {
             return retFail(std::string("Failed to get entity with exception: ")+e.what());
+        }
+    }
+
+    std::string http_request_handler_devkit::methodStatus(uint32_t sId) {
+        auto session = getSession(sId);
+        if (!session)
+            return retFail(std::string("No session active"));
+
+        try {
+            auto ret = (*session)([=](devkit_session &s) {
+                std::unordered_map<std::string, json_type> entries;
+
+                if (!s.r)
+                    return entries;
+
+                entries["ticks"] = s.status.ticksParsed;
+                entries["time"] = s.status.clock;
+                entries["picks"] = s.status.heroes;
+
+                return entries;
+            });
+
+            return retOk(ret.get());
+        } catch (std::exception &e) {
+            return retFail(std::string("Failed to get status with exception: ")+e.what());
         }
     }
 

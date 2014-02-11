@@ -13,6 +13,7 @@
 #include "http_request.hpp"
 #include "http_request_handler.hpp"
 #include "http_mime_type.hpp"
+#include "json.hpp"
 
 #include "config.hpp"
 
@@ -38,14 +39,14 @@ namespace dota {
             /** Contains values returnes by the STATUS Api call */
             struct game_status {
                 /** Default constructor for member initialization */
-                game_status() : ticksParsed(0), clock(0), heroes{0,0,0,0,0,0,0,0} {}
+                game_status() : ticksParsed(0), clock(0), heroes{-1,-1,-1,-1,-1,-1,-1,-1} {}
 
                 /** Number of ticks parsed until now */
                 uint32_t ticksParsed;
                 /** In-Game time */
                 uint32_t clock;
                 /** ID's of heroes picked */
-                uint32_t heroes[8];
+                std::vector<json_type> heroes;
             };
 
             /** Struct for a devkit session */
@@ -67,6 +68,9 @@ namespace dota {
 
             /** handle the http request */
             virtual http_reply handle(http_request req);
+
+            /** Returns session if it exists */
+            monitor<devkit_session>* getSession(uint32_t id);
         private:
             /** htdocs folder, set via DEVKIT_HTDOCS define */
             std::string htdocs;
@@ -78,9 +82,6 @@ namespace dota {
             std::unordered_map<uint32_t, monitor<devkit_session>*> sessions;
             /** mutex for locking / unlocking the session map */
             std::mutex sessionMutex;
-
-            /** Returns session if it exists */
-            monitor<devkit_session>* getSession(uint32_t id);
 
             /** Returns result of LIST API call */
             std::string methodList();
@@ -96,9 +97,11 @@ namespace dota {
             std::string methodEntities(uint32_t sId);
             /** Returns result of ENTITY API call */
             std::string methodEntity(std::string arg, uint32_t sId);
-            /** Returns result SEND API call */
+            /** Returns result of STATUS API call */
+            std::string methodStatus(uint32_t sId);
+            /** Returns result of SEND API call */
             std::string methodSend(uint32_t sId);
-            /** Returns result RECV API call */
+            /** Returns result of RECV API call */
             std::string methodRecv(uint32_t sId);
     };
 }
