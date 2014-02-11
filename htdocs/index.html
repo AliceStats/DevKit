@@ -5,10 +5,10 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
-        
+
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -19,36 +19,36 @@
     <body>
         <!-- Alice Devkit CSS -->
         <style type="text/css">
-            body { 
-                padding-top: 70px; 
+            body {
+                padding-top: 70px;
             }
-            
+
             h2 {
                 margin-top: 0;
             }
-            
+
             .alice-view {
                 display: none;
             }
-            
+
             .nav-pills > li .close {
 			    margin: 2px -2px 0 6px;
 			    font-size: 17px;
 			}
-			
+
 			.control-actions button {
-			    margin-right: 20px;    
+			    margin-right: 20px;
 			}
-			
+
 			.heroicons img {
 			    margin-top: 4px;
 			}
-			
+
 			.border {
 			    border-left: 1px solid #eee;
 			}
         </style>
-    
+
         <!-- Top Navigation Bar -->
         <div class="navbar navbar-default navbar-fixed-top " role="navigation">
             <div class="container-fluid">
@@ -58,20 +58,20 @@
                 <div id="nav-main">
                     <!-- Left Side -->
                     <ul class="nav navbar-nav">
-                        <li> 
+                        <li>
                             <a id="main-about" href="#">About</a>
                         </li>
-                        <li> 
+                        <li>
                             <a data-toggle="modal" data-target="#entityModal" id="main-entities" href="#">Entities</a>
                         </li>
-                        <li> 
-                            <a data-toggle="modal" data-target="#stringtableModal" id="main-stringtables" href="#">Stringtables</a> 
+                        <li>
+                            <a data-toggle="modal" data-target="#stringtableModal" id="main-stringtables" href="#">Stringtables</a>
                         </li>
-                        <li> 
-                            <a id="main-recvprops" href="#">Recvprops</a> 
+                        <li>
+                            <a id="main-recvprops" href="#">Recvprops</a>
                         </li>
-                        <li> 
-                            <a id="main-sendprops" href="#">Sendprops</a> 
+                        <li>
+                            <a id="main-sendprops" href="#">Sendprops</a>
                         </li>
                     </ul>
                     <!-- Right Side -->
@@ -81,16 +81,16 @@
                                 <span class="glyphicon glyphicon-th"></span> Control
                             </a>
                         </li>
-                        <li> 
-                            <a href="https://github.com/AliceStats"> 
+                        <li>
+                            <a href="https://github.com/AliceStats">
                                 <span class="glyphicon glyphicon-cloud-download"></span> Alice on Github
-                            </a> 
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
-        
+
         <!-- Content -->
         <div class="container-fluid">
             <!-- Control current replay -->
@@ -140,7 +140,7 @@
                                 <input type="text" class="form-control" placeholder="0">
                             </div>
                         </div>
-                        
+
                         <!-- Current Game Time -->
                         <div class="col-lg-2">
                             <div class="input-group">
@@ -148,7 +148,7 @@
                                 <input type="text" class="form-control" placeholder="00:00">
                             </div>
                         </div>
-                        
+
                         <!-- Score -->
                         <div class="col-lg-2">
                             <div class="input-group">
@@ -156,7 +156,7 @@
                                 <input type="text" class="form-control" placeholder="0 - 0">
                             </div>
                         </div>
-                        
+
                         <!-- Icons of picked heroes -->
                         <div class="col-lg-4 heroicons">
                             <img height="28" src="images/icons/abaddon.png" />
@@ -164,7 +164,7 @@
                             <img height="28" src="images/icons/antimage.png" />
                             <img height="28" src="images/icons/chen.png" />
                             <img height="28" src="images/icons/drow.png" />
-                            
+
                             <img height="28" src="images/icons/enigma.png" />
                             <img height="28" src="images/icons/pudge.png" />
                             <img height="28" src="images/icons/kunkka.png" />
@@ -172,9 +172,9 @@
                             <img height="28" src="images/icons/zuus.png" />
                         </div>
                     </div>
-                </div>   
+                </div>
             </div>
-        
+
             <!-- Tabs for opened entities and stuff -->
             <div id="content" class="panel panel-default">
                 <div class="panel-body">
@@ -185,10 +185,10 @@
                         <!-- Tab panes, see addTab -->
                         <div class="tab-content"></div>
                     </div>
-                </div>   
+                </div>
              </div>
         </div>
-        
+
         <!-- Intro View -->
         <div class="alice-view" id="about-view">
             <div class="col-lg-5">
@@ -202,7 +202,7 @@
                     The caret next to the open button shows you a list of replays to choose from. Opening a replay
                     automatically closes the last opened replay and removes all content related to it.
                 </p>
-                
+
                 <h4>First Steps</h4>
                 <p>
                     A replay is divided into a range of different messages. The first couple messages contain mostly
@@ -211,25 +211,25 @@
                 </p>
                 <p>
                     You can select the number of messages you want to parse in the control panel. As the parsing
-                    happens on the sever-side of the applications, parsing higher number of messages does only 
+                    happens on the sever-side of the applications, parsing higher number of messages does only
                     increase the loading time by a very small amount.
                 </p>
                 <p>
                     Once you have reached the first message containing picks and game data, the corresponding
                     fields in the control panel will automatically show you the received data.
                 </p>
-                
+
                 <h4>Entities</h4>
                 <p>
                     Entities contain everything you see in the game, such as heroes, creeps and the current
-                    cursor position. Entities by themselves are not unique and may contain data linking them 
+                    cursor position. Entities by themselves are not unique and may contain data linking them
                     to other entities, for example Players and their selected heroes.
                 </p>
                 <p>
                     They also contain the gamestate which includes properties like the score or the number of
                     spectators.
                 </p>
-                
+
                 <h4>Stringtables</h4>
                 <p>
                     Stringtables contain a wide-range of different data grouped unter different keys.
@@ -238,7 +238,7 @@
                     The DevKit only shows data for a small range of stringtables as we haven't figure out
                     how to parse most of them yet.
                 </p>
-                
+
                 <h4>Recvprops</h4>
                 <p>
                     Displays a list of flattened sendtables.
@@ -251,7 +251,7 @@
                 </p>
                 <h4>Sendprops</h4>
                 <p>
-                    This is the unfiltered list of Sendprops. Only really interesting for debugging and 
+                    This is the unfiltered list of Sendprops. Only really interesting for debugging and
                     development purposes.
                 </p>
             </div>
@@ -262,7 +262,7 @@
                 <h4>About</h4>
                 <p>
                     This development kit is part of <a href="https://github.com/AliceStats">Alice</a>.<br />
-                    Alice is FOSS software licensed under the 
+                    Alice is FOSS software licensed under the
                     <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 License</a>.
                 </p>
                 <h4>3rd-Party Software</h4>
@@ -278,7 +278,7 @@
                 </p>
             </div>
         </div>
-        
+
         <!-- Entities Modal -->
         <div id="entities-modal">
             <div class="modal fade" id="entityModal" tabindex="-1" role="dialog" aria-labelledby="entityModalLabel" aria-hidden="true">
@@ -306,7 +306,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Entities View -->
         <div class="alice-view" id="entities-view">
             <table class="table table-condensed table-condensed">
@@ -325,7 +325,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Stringtables Modal -->
         <div id="stringtables-modal">
             <div class="modal fade" id="stringtableModal" tabindex="-1" role="dialog" aria-labelledby="stringtableModalLabel" aria-hidden="true">
@@ -358,16 +358,16 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Stringtables View -->
         <div class="alice-view" id="stringtables-view">
             <!-- Subjective to each template, need to implement -->
         </div>
-        
+
         <!-- Recvprops View -->
         <div class="alice-view" id="recvprops-view">
             <div class="panel-group" id="accordion">
-            
+
                 <div class="panel panel-default">
                     <!-- header -->
                     <div class="panel-heading">
@@ -377,7 +377,7 @@
                             </a>
                         </h4>
                     </div>
-                    
+
                     <!-- content -->
                     <div id="propertyone">
                         <div class="panel-body">
@@ -390,30 +390,32 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <!-- Sendprops View -->
         <div class="alice-view" id="sendprops-view">
-            
+
         </div>
-        
+
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="//code.jquery.com/jquery.js"></script>
         <!-- Bootstrap Javascript -->
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <!-- Handlebar Javasacript -->
         <script src="js/handlebars-v1.3.0.js"></script>
+        <!-- Growl-like notifications -->
+        <script src="js/jquery.bootstrap-growl.min.js"></script>
         <!-- Our own Javascript -->
         <script type="text/javascript">
             var composeCount = 0;   // number of tabs added to switch to the last created one
-            
+
             // shows a specific tab
             function switchToTab(tabId) {
                 $('#tabs a[href="#' + tabId + '"]').tab('show');
             }
-            
+
             // adds a new tab containing the specified html
             function addTab(title, content) {
                 $("#content").show();
@@ -422,7 +424,25 @@
                 $('#tabs .tab-content').append('<div class="tab-pane" id="' + tabId + '">'+content+'</div>');
                 switchToTab(tabId);
             }
-            
+
+            // does an api request
+            function request(type, args, callback) {
+                $.ajax({
+                    url: "/api/"+type+"/"+args
+                }).done(function(data) {
+                    if (data.success) {
+                        callback(data);
+                    } else {
+                        $.bootstrapGrowl(data.data, {
+                            type: 'error',
+                            align: 'center',
+                            width: 'auto',
+                            allow_dismiss: false
+                        });
+                    }
+                });
+            }
+
             // initialize page
             $(function () {
                 // register onClose for all tabs
@@ -430,31 +450,31 @@
                     var tabContentId = $(this).parent().attr("href");
                     $(this).parent().parent().remove(); //remove li of tab
                     $(tabContentId).remove(); //remove respective tab content
-                    
+
                     if ($("#tabs .tab-content").html() === "") {
                         $("#content").hide();
                     }
                 });
-                
+
                 // register onClick for all tabs
                 $("#tabs").on("click", "a", function (e) {
                     e.preventDefault();
                     $(this).tab('show');
                 });
-                
+
                 // toggle control board
                 $("#toggle-control").click(function() {
-                    $("#control").toggle(); 
+                    $("#control").toggle();
                 });
-                
+
                 // add about tab
                 $("#main-about").click(function() {
                     addTab("About", $("#about-view").html());
                 });
-                
+
                 // hide the control panel by default
-                $("#control").toggle(); 
-                
+                $("#control").toggle();
+
                 // add the about tab
                 addTab("About", $("#about-view").html());
             });
