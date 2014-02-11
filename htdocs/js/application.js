@@ -24,7 +24,7 @@ function request(type, args, callback) {
             callback(data);
         } else {
             $.bootstrapGrowl(data.data, {
-                type: 'error',
+                type: 'info',
                 align: 'center',
                 width: 'auto',
                 allow_dismiss: false
@@ -67,7 +67,34 @@ $(function () {
 
     // listen on replay open
     $("#openmenu").on("click", ".openreplay", function() {
-        alert($(this).attr("data-replay"));
+        var attr = $(this).attr("data-replay");
+        request("01", attr, function(data) {
+            $("#openpath").val(attr);
+            $.bootstrapGrowl(data.data);
+        });
+    });
+
+    // listen on replay parse
+    $("#btnparse").click(function() {
+        request("02", $("#parsecount").val(), function(data) {
+            $.bootstrapGrowl(data.data);
+        });
+    });
+
+    // listen on replay reload
+    $("#btnreload").click(function() {
+        var attr = $("#openmenu").val();
+        request("01", attr, function(data) {
+            $.bootstrapGrowl(data.data);
+        });
+    });
+
+    // listen on replay close
+    $("#btnclose").click(function() {
+        request("03", "", function(data) {
+            $("#openpath").val("");
+            $.bootstrapGrowl(data.data);
+        });
     });
 
     // add the about tab

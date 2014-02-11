@@ -47,6 +47,11 @@
 			.border {
 			    border-left: 1px solid #eee;
 			}
+
+			#openpath {
+			    color: green;
+			    font-weight: bold;
+			}
         </style>
 
         <!-- Top Navigation Bar -->
@@ -106,29 +111,25 @@
                                         <span class="caret"></span>
                                         <span class="sr-only">Toggle Dropdown</span>
                                     </button>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#">Replay 1</a></li>
-                                        <li><a href="#">Replay 2</a></li>
-                                        <li><a href="#">Replay 3</a></li>
-                                    </ul>
+                                    <ul id="openmenu" class="dropdown-menu" role="menu"></ul>
                                 </div>
-                                <input class="form-control" type="text">
+                                <input id="openpath" class="form-control" type="text">
                             </div>
                         </div>
                         <!-- Parse X Messages -->
                         <div class="col-lg-2">
                             <div class="input-group">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button">Parse</button>
+                                    <button id="btnparse" class="btn btn-default" type="button">Parse</button>
                                 </span>
-                                <input type="text" class="form-control" placeholder="100">
+                                <input id="parsecount" type="text" class="form-control" placeholder="100">
                             </div>
                         </div>
                         <!-- Reload / Export / Close replay -->
                         <div class="control-actions col-lg-4">
-                            <button class="btn btn-default" type="button">Reload</button>
+                            <button id="btnreload" class="btn btn-default" type="button">Reload</button>
                             <button class="btn btn-default" type="button">Export JSON</button>
-                            <button class="btn btn-default" type="button">Close</button>
+                            <button id="btnclose" class="btn btn-default" type="button">Close</button>
                         </div>
                     </div>
                     <hr />
@@ -408,76 +409,6 @@
         <!-- Growl-like notifications -->
         <script src="js/jquery.bootstrap-growl.min.js"></script>
         <!-- Our own Javascript -->
-        <script type="text/javascript">
-            var composeCount = 0;   // number of tabs added to switch to the last created one
-
-            // shows a specific tab
-            function switchToTab(tabId) {
-                $('#tabs a[href="#' + tabId + '"]').tab('show');
-            }
-
-            // adds a new tab containing the specified html
-            function addTab(title, content) {
-                $("#content").show();
-                var tabId = "tab" + composeCount++;
-                $('#tabs .nav-pills').append('<li><a href="#' + tabId + '"><button class="close closeTab" type="button" >&times;</button> '+title+' </a></li>');
-                $('#tabs .tab-content').append('<div class="tab-pane" id="' + tabId + '">'+content+'</div>');
-                switchToTab(tabId);
-            }
-
-            // does an api request
-            function request(type, args, callback) {
-                $.ajax({
-                    url: "/api/"+type+"/"+args
-                }).done(function(data) {
-                    if (data.success) {
-                        callback(data);
-                    } else {
-                        $.bootstrapGrowl(data.data, {
-                            type: 'error',
-                            align: 'center',
-                            width: 'auto',
-                            allow_dismiss: false
-                        });
-                    }
-                });
-            }
-
-            // initialize page
-            $(function () {
-                // register onClose for all tabs
-                $("#tabs").on("click", ".close", function () {
-                    var tabContentId = $(this).parent().attr("href");
-                    $(this).parent().parent().remove(); //remove li of tab
-                    $(tabContentId).remove(); //remove respective tab content
-
-                    if ($("#tabs .tab-content").html() === "") {
-                        $("#content").hide();
-                    }
-                });
-
-                // register onClick for all tabs
-                $("#tabs").on("click", "a", function (e) {
-                    e.preventDefault();
-                    $(this).tab('show');
-                });
-
-                // toggle control board
-                $("#toggle-control").click(function() {
-                    $("#control").toggle();
-                });
-
-                // add about tab
-                $("#main-about").click(function() {
-                    addTab("About", $("#about-view").html());
-                });
-
-                // hide the control panel by default
-                $("#control").toggle();
-
-                // add the about tab
-                addTab("About", $("#about-view").html());
-            });
-        </script>
+        <script src="js/application.js" type="text/javascript"></script>
     </body>
 </html>
