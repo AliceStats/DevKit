@@ -188,7 +188,7 @@ namespace dota {
 
                 s.r = new reader(file);
                 s.status = game_status(); // reset current status
-            });
+            }).get();
 
             return retOk(std::string("Replay Opened"));
         } catch (std::exception &e) {
