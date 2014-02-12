@@ -282,7 +282,7 @@ namespace dota {
 
         try {
             auto ent = (*session)([=](devkit_session &s) {
-                std::unordered_map<std::string, json_type> entries;
+                std::vector<json_type> entries;
 
                 // returns an empty set if no replay is opened
                 if (!s.r)
@@ -290,7 +290,10 @@ namespace dota {
 
                 gamestate::entityMap &entities = s.r->getState().getEntities();
                 for (auto &ent : entities) {
-                    entries[std::to_string(ent.first)] = ent.second->getClassName();
+                    std::vector<json_type> sub;
+                    sub.push_back(ent.first);
+                    sub.push_back(ent.second->getClassName());
+                    entries.push_back(std::move(sub));
                 }
 
                 return entries;
