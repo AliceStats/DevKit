@@ -132,8 +132,17 @@ $(function () {
         }
     });
 
+    Handlebars.registerHelper('flag', function(f) {
+        var ret = "";
+        $.each(flags, function(index, key) {
+            if (f & key.flag)
+               ret += '<span class="label label-default" title="'+key.description+'">'+key.name+'</span>&nbsp;';
+        });
+
+        return ret;
+    });
+
     var entityTpl = Handlebars.compile($("#entity-template").html());
-    var recvTpl = Handlebars.compile($("#recv-template").html());
 
     // --- Functions that require templates ---
 

@@ -336,36 +336,6 @@
         <!-- Stringtables View -->
         <div class="alice-view" id="stringtables-view"> <!-- Subjective to each table -->  </div>
 
-        <!-- Sendprops View -->
-        <div class="alice-view" id="sendprops-view"></div>
-
-        <!-- Recvprops Template -->
-        <script id="recv-template" type="text/x-handlebars-template">
-            <div class="panel-group" id="accordion">
-                {{#data}}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#propertyone">
-                                Property #1
-                            </a>
-                        </h4>
-                    </div>
-
-                    <div id="propertyone">
-                        <div class="panel-body">
-                            <div class="col-lg-4">
-                                Recvprop details
-                            </div>
-                            <div class="col-lg-8">
-                                Recvprop properties table
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{/data}}
-            </div>
-        </script>
 
         <!-- Entities Template -->
         <script id="entity-template" type="text/x-handlebars-template">
@@ -386,7 +356,7 @@
                         <td>{{name}}</td>
                         <td>{{typeToString type}}</td>
                         <td>{{value}}</td>
-                        <td>{{flags}}</td>
+                        <td>{{{flag flags}}}</td>
                     </tr>
                     {{/data}}
                 </tbody>

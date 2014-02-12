@@ -334,12 +334,11 @@ namespace dota {
                     for (auto it : *(e->second)) {
                         std::unordered_map<std::string, json_type> entry;
                         sendprop *p = it.second.getSendprop();
-                        std::bitset<32> flagset(p->getFlags());
 
                         entry["name"] = it.second.getName();
                         entry["value"] = it.second.asString();
                         entry["type"] = it.second.getType();
-                        entry["flags"] = flagset.to_string();
+                        entry["flags"] = p->getFlags();
 
                         entries.push_back(entry);
                     }
@@ -399,12 +398,11 @@ namespace dota {
                     std::vector<json_type> props;
                     for (auto &t : it.value) {
                         std::unordered_map<std::string, json_type> entry;
-                        std::bitset<32> flagset(t.value->getFlags());
 
                         entry["type"] = t.value->getType();
                         entry["name"] = t.value->getName();
                         entry["netname"] = t.value->getNetname();
-                        entry["flags"] = flagset.to_string();
+                        entry["flags"] = t.value->getFlags();
                         entry["priority"] = t.value->getPriority();
                         entry["classname"] = t.value->getClassname();
                         entry["elements"] = t.value->getElements();
