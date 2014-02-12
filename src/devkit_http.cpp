@@ -370,7 +370,7 @@ namespace dota {
                 entries["time"] = s.status.clock;
                 entries["picks"] = s.status.heroes;
                 entries["file"] = s.status.file;
-                entries["scrore"] = s.status.score;
+                entries["score"] = s.status.score;
 
                 return entries;
             });
