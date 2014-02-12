@@ -15,7 +15,8 @@ namespace dota {
         { "png", "image/png" },
 
         // scripts
-        { "js", "text/javascript" }
+        { "js", "text/javascript" },
+        { "css", "text/css" }
     };
 
     /** Mime type to use if file extension is not known */
