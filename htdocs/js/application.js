@@ -33,46 +33,57 @@ function request(type, args, callback) {
     });
 }
 
-// refresh content
-function refresh() {
-    // refresh list of replays
-    request("00", "", function(data) {
-        $("#openmenu").html("");
-
-        $.each(data.data, function(index, value) {
-            $("#openmenu").append('<li><a class="openreplay" data-replay="'+value+'" href="#">'+value+'</a></li>');
-        });
-    });
-
-    // refresh the list of stringtables
-    request("04", "", function(data) {
-        $("#stringtable-list").html(""); // reset
-        $.each(data.data, function(name, subs) {
-            $("#stringtable-list").append('<optgroup id="group-'+name+'" label="'+name+'"></optgroup>');
-            $.each(subs, function(id, sub){
-                 $("#stringtable-list").append('<option data-group="'+name+'" data-filter="'+sub.toLowerCase()+'">'+sub+'</option>');
-            });
-        });
-    });
-
-    // refresh the list of entities
-    request("06", "", function(data) {
-        data.data.sort(function(a, b) { return a[1] > b[1] ? 1 : -1; });
-        $("#entity-list").html("");
-
-        $.each(data.data, function(id, val) {
-            $("#entity-list").append(
-                '<option data-filter="'+val[1].toLowerCase()+'" value="'+val[0]+'">'+val[1]+' - ('+val[0]+')</option>'
-            );
-        });
-    });
-}
-
 // initialize page
 $(function () {
     // --- Templates ---
 
     var entityTpl = Handlebars.compile($("#entity-template").html());
+
+    // --- Functions that require templates ---
+
+    // refresh content
+    function refresh() {
+        // refresh list of replays
+        request("00", "", function(data) {
+            $("#openmenu").html("");
+
+            $.each(data.data, function(index, value) {
+                $("#openmenu").append('<li><a class="openreplay" data-replay="'+value+'" href="#">'+value+'</a></li>');
+            });
+        });
+
+        // refresh the list of stringtables
+        request("04", "", function(data) {
+            $("#stringtable-list").html(""); // reset
+            $.each(data.data, function(name, subs) {
+                $("#stringtable-list").append('<optgroup id="group-'+name+'" label="'+name+'"></optgroup>');
+                $.each(subs, function(id, sub){
+                     $("#stringtable-list").append('<option data-group="'+name+'" data-filter="'+sub.toLowerCase()+'">'+sub+'</option>');
+                });
+            });
+        });
+
+        // refresh the list of entities
+        request("06", "", function(data) {
+            data.data.sort(function(a, b) { return a[1] > b[1] ? 1 : -1; });
+            $("#entity-list").html("");
+
+            $.each(data.data, function(id, val) {
+                $("#entity-list").append(
+                    '<option data-filter="'+val[1].toLowerCase()+'" value="'+val[0]+'">'+val[1]+' - ('+val[0]+')</option>'
+                );
+            });
+        });
+
+        // refresh loaded entities
+        $( ".entity-tab" ).each(function() {
+            var id = $(this).attr("data-addon");
+            var tab = $(this);
+            request("07", id, function (data) {
+                tab.html(entityTpl(data));
+            });
+        });
+    }
 
     // --- Filter ----
 
@@ -187,7 +198,7 @@ $(function () {
             var id = $(this).val();
             var name = $(this).html();
             request("07", id, function (data) {
-                addTab("Entity "+name, entityTpl(data), ".entity-tab", id);
+                addTab("Entity "+name, entityTpl(data), "entity-tab", id);
             });
         });
     });
