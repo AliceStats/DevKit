@@ -83,6 +83,14 @@ $(function () {
                 tab.html(entityTpl(data));
             });
         });
+
+        // refresh status
+        request("08", "", function(data) {
+            $("#openpath").val(data.data.file);
+            $("#status-tick").val(data.data.ticks);
+            $("#status-score").val(data.data.score);
+            $("#status-time").val(data.data.time);
+        });
     }
 
     // --- Filter ----
@@ -206,10 +214,10 @@ $(function () {
     // --- Setup ---
 
     // hide the control panel by default
-    $("#control").toggle();
+    //$("#control").toggle();
 
     // add the about tab
-    addTab("About", $("#about-view").html());
+    //addTab("About", $("#about-view").html());
 
     // refresh content
     refresh();
