@@ -12,7 +12,10 @@ namespace dota {
         { "gif", "image/gif" },
         { "jpg", "image/jpeg" },
         { "jpeg", "image/jpeg" },
-        { "png", "image/png" }
+        { "png", "image/png" },
+
+        // scripts
+        { "js", "text/javascript" }
     };
 
     /** Mime type to use if file extension is not known */
