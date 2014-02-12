@@ -76,12 +76,6 @@
                         <li>
                             <a data-toggle="modal" data-target="#stringtableModal" id="main-stringtables" href="#">Stringtables</a>
                         </li>
-                        <li>
-                            <a id="main-recvprops" href="#">Recvprops</a>
-                        </li>
-                        <li>
-                            <a id="main-sendprops" href="#">Sendprops</a>
-                        </li>
                     </ul>
                     <!-- Right Side -->
                     <ul class="nav navbar-nav navbar-right">
@@ -126,13 +120,12 @@
                                 <span class="input-group-btn">
                                     <button id="btnparse" class="btn btn-default" type="button">Parse</button>
                                 </span>
-                                <input id="parsecount" type="text" class="form-control" placeholder="100">
+                                <input id="parsecount" type="text" class="form-control" value="100">
                             </div>
                         </div>
                         <!-- Reload / Export / Close replay -->
                         <div class="control-actions col-lg-4">
                             <button id="btnreload" class="btn btn-default" type="button">Reload</button>
-                            <button class="btn btn-default" type="button">Export JSON</button>
                             <button id="btnclose" class="btn btn-default" type="button">Close</button>
                         </div>
                     </div>
@@ -343,12 +336,14 @@
         <!-- Stringtables View -->
         <div class="alice-view" id="stringtables-view"> <!-- Subjective to each table -->  </div>
 
-        <!-- Recvprops View -->
-        <div class="alice-view" id="recvprops-view">
-            <div class="panel-group" id="accordion">
+        <!-- Sendprops View -->
+        <div class="alice-view" id="sendprops-view"></div>
 
+        <!-- Recvprops Template -->
+        <script id="recv-template" type="text/x-handlebars-template">
+            <div class="panel-group" id="accordion">
+                {{#data}}
                 <div class="panel panel-default">
-                    <!-- header -->
                     <div class="panel-heading">
                         <h4 class="panel-title">
                             <a data-toggle="collapse" data-parent="#accordion" href="#propertyone">
@@ -357,7 +352,6 @@
                         </h4>
                     </div>
 
-                    <!-- content -->
                     <div id="propertyone">
                         <div class="panel-body">
                             <div class="col-lg-4">
@@ -369,37 +363,34 @@
                         </div>
                     </div>
                 </div>
-
+                {{/data}}
             </div>
-        </div>
-
-        <!-- Sendprops View -->
-        <div class="alice-view" id="sendprops-view"></div>
+        </script>
 
         <!-- Entities Template -->
         <script id="entity-template" type="text/x-handlebars-template">
-                <table class="table table-condensed table-condensed sortable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Value</th>
-                            <th>Flags</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#data}}
-                        <tr>
-                            <td>{{@index}}</td>
-                            <td>{{name}}</td>
-                            <td>{{type}}</td>
-                            <td>{{value}}</td>
-                            <td>{{flags}}</td>
-                        </tr>
-                        {{/data}}
-                    </tbody>
-                </table>
+            <table class="table table-condensed table-condensed">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Flags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#data}}
+                    <tr>
+                        <td>{{@index}}</td>
+                        <td>{{name}}</td>
+                        <td>{{typeToString type}}</td>
+                        <td>{{value}}</td>
+                        <td>{{flags}}</td>
+                    </tr>
+                    {{/data}}
+                </tbody>
+            </table>
         </script>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

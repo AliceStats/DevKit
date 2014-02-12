@@ -1,4 +1,78 @@
+// global variables
 var composeCount = 0;   // number of tabs added to switch to the last created one
+
+// for descriptions see http://swarm-deferred.googlecode.com/svn/trunk/src/public/dt_common.h
+var flags = [
+    {
+        name: "Unsigned",
+        description: "Value is an unsigned integer",
+        flag: (1<<0)
+    }, {
+        name: "Coord",
+        description: "Float / Vector is treated like a world coordinate",
+        flag: (1<<1)
+    }, {
+        name: "NoScale",
+        description: "Float / Vector doesn't scale into range, take value as it is",
+        flag: (1<<2)
+    }, {
+        name: "Rounddown",
+        description: "Limit high value to range minues one bit unit",
+        flag: (1<<3)
+    }, {
+        name: "Roundup",
+        description: "Limit low value to range minus one bit unit",
+        flag: (1<<4)
+    }, {
+        name: "Normal",
+        description: "Only valid for vectors, treat vector like a normal",
+        flag: (1<<5)
+    }, {
+        name: "Exclude",
+        description: "This property points at another property to be excluded",
+        flag: (1<<6)
+    }, {
+        name: "XYZE",
+        description: "XYZ/Exponent encoding for vectors",
+        flag: (1<<7)
+    }, {
+        name: "InsideArray",
+        description: "Property is inside an array",
+        flag: (1<<8)
+    }, {
+        name: "Collapsible",
+        description: "Set for tables with an offset of 0 that don't change the pointer",
+        flag: (1<<11)
+    }, {
+        name: "Coord-MP",
+        description: "Float /Vector is retared like a world coordinate, multi-player version",
+        flag: (1<<12)
+    }, {
+        name: "Coord Low-Precision",
+        description: "Fraction component only gets 3 bits instead of 5",
+        flag: (1<<13)
+    }, {
+        name: "Coord Int",
+        description: "Coordinates are rounded to integral boundaries",
+        flag: (1<<14)
+    }, {
+        name: "Cell Coord",
+        description: "Cell coordinates that can't be negative, bit count indicate maximum value",
+        flag: (1<<15)
+    }, {
+        name: "Cell Coord Low-Precision",
+        description: "Fraction component only gets 3 bits instead of 5",
+        flag: (1<<16)
+    }, {
+        name: "Cell Coord Integral",
+        description: "Rounded to integral boundaries",
+        flag: (1<<17)
+    }, {
+        name: "Changes Often",
+        description: "Moved to head of sendtable so it gets a small index",
+        flag: (1<<18)
+    }
+];
 
 // shows a specific tab
 function switchToTab(tabId) {
@@ -37,7 +111,29 @@ function request(type, args, callback) {
 $(function () {
     // --- Templates ---
 
+    Handlebars.registerHelper('typeToString', function(t) {
+        switch (t) {
+            case 0:
+                return "Int";
+            case 1:
+                return "Float";
+            case 2:
+                return "Vector XYZ";
+            case 3:
+                return "Vector XY";
+            case 4:
+                return "String";
+            case 5:
+                return "Array";
+            case 6:
+                return "DataTable";
+            case 7:
+                return "Int64";
+        }
+    });
+
     var entityTpl = Handlebars.compile($("#entity-template").html());
+    var recvTpl = Handlebars.compile($("#recv-template").html());
 
     // --- Functions that require templates ---
 
