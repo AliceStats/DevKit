@@ -6,11 +6,11 @@ function switchToTab(tabId) {
 }
 
 // adds a new tab containing the specified html
-function addTab(title, content) {
+function addTab(title, content, classes, addon) {
     $("#content").show();
     var tabId = "tab" + composeCount++;
     $('#tabs .nav-pills').append('<li><a href="#' + tabId + '"><button class="close closeTab" type="button" >&times;</button> '+title+' </a></li>');
-    $('#tabs .tab-content').append('<div class="tab-pane" id="' + tabId + '">'+content+'</div>');
+    $('#tabs .tab-content').append('<div class="tab-pane '+classes+'" data-addon="'+addon+'" id="' + tabId + '">'+content+'</div>');
     switchToTab(tabId);
 }
 
@@ -70,16 +70,18 @@ function refresh() {
 
 // initialize page
 $(function () {
+    // --- Templates ---
+
+    var entityTpl = Handlebars.compile($("#entity-template").html());
+
     // --- Filter ----
+
     $(".filter").on('input', function() {
         var target = "#"+$(this).attr("data-target")+" option";
         var filter = $(this).val().toLowerCase();
 
-        // TODO: Find efficient way to implement showing / removing elements
-        // - Don't wrap them in span's this will crash the tab on slow pc's
-        // - Don't use hide, doesn't work on IE, Chrome
-        // - Implement moving into .hidden and .visible without breaking
-        ///  optgroups
+        // Still slow for stringtables,
+        // TODO: Test this on older hardware to see if this is a problem
 
         $(target).filter(function () {
             if ($(this).attr("data-filter").indexOf(filter) == -1) {
@@ -168,6 +170,25 @@ $(function () {
             $("#openpath").val("");
             $.bootstrapGrowl(data.data);
             refresh();
+        });
+    });
+
+    // --- Overlays ---
+
+    // listen on stringtable load
+    $("#stringtable-load").click(function() {
+
+    });
+
+    // listen on entity load
+    $("#entity-load").click(function() {
+        // add a tab for each selected entity
+        $( "#entity-list option:selected" ).each(function() {
+            var id = $(this).val();
+            var name = $(this).html();
+            request("07", id, function (data) {
+                addTab("Entity "+name, entityTpl(data), ".entity-tab", id);
+            });
         });
     });
 
