@@ -188,6 +188,7 @@ namespace dota {
 
                 s.r = new reader(file);
                 s.status = game_status(); // reset current status
+                s.status.file = arg;
             }).get();
 
             return retOk(std::string("Replay Opened"));
@@ -214,6 +215,7 @@ namespace dota {
                     for (uint32_t i = 0; i < num; ++i) {
                         s.r->readMessage();
                     }
+                    s.status.ticksParsed += num;
                 }
             });
 
@@ -367,6 +369,8 @@ namespace dota {
                 entries["ticks"] = s.status.ticksParsed;
                 entries["time"] = s.status.clock;
                 entries["picks"] = s.status.heroes;
+                entries["file"] = s.status.file;
+                entries["scrore"] = s.status.score;
 
                 return entries;
             });

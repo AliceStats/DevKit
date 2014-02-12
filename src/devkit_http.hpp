@@ -39,12 +39,16 @@ namespace dota {
             /** Contains values returnes by the STATUS Api call */
             struct game_status {
                 /** Default constructor for member initialization */
-                game_status() : ticksParsed(0), clock(0), heroes{-1,-1,-1,-1,-1,-1,-1,-1} {}
+                game_status() : ticksParsed(0), clock(""), score(""), file(""), heroes{-1,-1,-1,-1,-1,-1,-1,-1} {}
 
                 /** Number of ticks parsed until now */
                 uint32_t ticksParsed;
                 /** In-Game time */
-                uint32_t clock;
+                std::string clock;
+                /** Current score */
+                std::string score;
+                /** Current file open */
+                std::string file;
                 /** ID's of heroes picked */
                 std::vector<json_type> heroes;
             };
