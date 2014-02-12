@@ -39,7 +39,7 @@ namespace dota {
             /** Contains values returnes by the STATUS Api call */
             struct game_status {
                 /** Default constructor for member initialization */
-                game_status() : ticksParsed(0), clock(""), score(""), file(""), heroes{-1,-1,-1,-1,-1,-1,-1,-1} {}
+                game_status() : ticksParsed(0), clock("00:00"), score("0 - 0"), file(""), heroes{-1,-1,-1,-1,-1,-1,-1,-1} {}
 
                 /** Number of ticks parsed until now */
                 uint32_t ticksParsed;
