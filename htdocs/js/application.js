@@ -48,11 +48,10 @@ function refresh() {
     request("04", "", function(data) {
         $("#stringtable-list").html(""); // reset
         $.each(data.data, function(name, subs) {
-            $("#stringtable-list").append('<optgroup label="'+name+'">');
+            $("#stringtable-list").append('<optgroup id="group-'+name+'" label="'+name+'"></optgroup>');
             $.each(subs, function(id, sub){
-                 $("#stringtable-list").append('<option data-filter="'+sub.toLowerCase()+'">'+sub+'</option>');
+                 $("#stringtable-list").append('<option data-group="'+name+'" data-filter="'+sub.toLowerCase()+'">'+sub+'</option>');
             });
-            $("#stringtable-list").append('</optgroup>');
         });
     });
 
@@ -83,12 +82,23 @@ $(function () {
         ///  optgroups
 
         $(target).filter(function () {
-            if (filter === "") {
-                // show = true
-            } else if ($(this).attr("data-filter").indexOf(filter) == -1) {
-                // show = false
+            if ($(this).attr("data-filter").indexOf(filter) == -1) {
+                if (!$(this).parent().hasClass("hidden")) {
+                    if (!$(this).parent().find(".hidden").length) {
+                        $(this).parent().append('<span class="hidden"></span>');
+                    }
+
+                    // hide
+                    $(this).appendTo($(this).parent().find(".hidden"));
+                }
             } else {
-                // show = true
+                if (filter === "" || $(this).parent().hasClass("hidden")) {
+                    var group = $(this).attr("data-group");
+                    if (!group)
+                        $(this).appendTo($(this).parent().parent());
+                    else
+                        $(this).insertAfter($("#group-"+group));
+                }
             }
         });
 
@@ -164,10 +174,10 @@ $(function () {
     // --- Setup ---
 
     // hide the control panel by default
-    //$("#control").toggle();
+    $("#control").toggle();
 
     // add the about tab
-    //addTab("About", $("#about-view").html());
+    addTab("About", $("#about-view").html());
 
     // refresh content
     refresh();
