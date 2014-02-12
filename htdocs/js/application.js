@@ -50,7 +50,7 @@ function refresh() {
         $.each(data.data, function(name, subs) {
             $("#stringtable-list").append('<optgroup label="'+name+'">');
             $.each(subs, function(id, sub){
-                 $("#stringtable-list").append('<option>'+sub+'</option>');
+                 $("#stringtable-list").append('<option data-filter="'+sub.toLowerCase()+'">'+sub+'</option>');
             });
             $("#stringtable-list").append('</optgroup>');
         });
@@ -62,13 +62,40 @@ function refresh() {
         $("#entity-list").html("");
 
         $.each(data.data, function(id, val) {
-            $("#entity-list").append('<option value="'+val[0]+'">'+val[1]+' - ('+val[0]+')</option>');
+            $("#entity-list").append(
+                '<option data-filter="'+val[1].toLowerCase()+'" value="'+val[0]+'">'+val[1]+' - ('+val[0]+')</option>'
+            );
         });
     });
 }
 
 // initialize page
 $(function () {
+    // --- Filter ----
+    $(".filter").on('input', function() {
+        var target = "#"+$(this).attr("data-target")+" option";
+        var filter = $(this).val().toLowerCase();
+
+        // TODO: Find efficient way to implement showing / removing elements
+        // - Don't wrap them in span's this will crash the tab on slow pc's
+        // - Don't use hide, doesn't work on IE, Chrome
+        // - Implement moving into .hidden and .visible without breaking
+        ///  optgroups
+
+        $(target).filter(function () {
+            if (filter === "") {
+                // show = true
+            } else if ($(this).attr("data-filter").indexOf(filter) == -1) {
+                // show = false
+            } else {
+                // show = true
+            }
+        });
+
+    });
+
+    // --- Tabbing ----
+
     // register onClose for all tabs
     $("#tabs").on("click", ".close", function () {
         var tabContentId = $(this).parent().attr("href");
@@ -86,6 +113,8 @@ $(function () {
         $(this).tab('show');
     });
 
+    // --- Control Panel ---
+
     // toggle control board
     $("#toggle-control").click(function() {
         $("#control").toggle();
@@ -95,9 +124,6 @@ $(function () {
     $("#main-about").click(function() {
         addTab("About", $("#about-view").html());
     });
-
-    // hide the control panel by default
-    $("#control").toggle();
 
     // listen on replay open
     $("#openmenu").on("click", ".openreplay", function() {
@@ -135,8 +161,13 @@ $(function () {
         });
     });
 
+    // --- Setup ---
+
+    // hide the control panel by default
+    //$("#control").toggle();
+
     // add the about tab
-    addTab("About", $("#about-view").html());
+    //addTab("About", $("#about-view").html());
 
     // refresh content
     refresh();
