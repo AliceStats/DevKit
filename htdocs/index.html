@@ -291,17 +291,12 @@
                         </div>
                         <div class="modal-body">
                             <h6>Select entities below to load their content.</h6>
-                            <select size=20 multiple class="form-control">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
+                            <!-- Entity list will be displayed here -->
+                            <select id="entity-list" size=20 multiple class="form-control"></select>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Load</button>
+                            <button id="entity-load" type="button" class="btn btn-primary">Load</button>
                         </div>
                     </div>
                 </div>
@@ -338,22 +333,12 @@
                         </div>
                         <div class="modal-body">
                             <h6>Select a stringtable from below to load its content.</h6>
-                            <select size=20 class="form-control">
-                                <optgroup label="baselineinstance">
-                                    <option>123</option>
-                                    <option>456</option>
-                                    <option>789</option>
-                                </optgroup>
-                                <optgroup label="baselineinstance2">
-                                    <option>123</option>
-                                    <option>456</option>
-                                    <option>789</option>
-                                </optgroup>
-                            </select>
+                            <!-- Stringtable list will be displayed here -->
+                            <select id="stringtable-list" size=20 class="form-control"></select>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Load</button>
+                            <button id="stringtable-load" type="button" class="btn btn-primary">Load</button>
                         </div>
                     </div>
                 </div>
@@ -361,9 +346,7 @@
         </div>
 
         <!-- Stringtables View -->
-        <div class="alice-view" id="stringtables-view">
-            <!-- Subjective to each template, need to implement -->
-        </div>
+        <div class="alice-view" id="stringtables-view"> <!-- Subjective to each table -->  </div>
 
         <!-- Recvprops View -->
         <div class="alice-view" id="recvprops-view">
@@ -396,9 +379,7 @@
         </div>
 
         <!-- Sendprops View -->
-        <div class="alice-view" id="sendprops-view">
-
-        </div>
+        <div class="alice-view" id="sendprops-view"></div>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="//code.jquery.com/jquery.js"></script>

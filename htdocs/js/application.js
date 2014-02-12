@@ -33,6 +33,40 @@ function request(type, args, callback) {
     });
 }
 
+// refresh content
+function refresh() {
+    // refresh list of replays
+    request("00", "", function(data) {
+        $("#openmenu").html("");
+
+        $.each(data.data, function(index, value) {
+            $("#openmenu").append('<li><a class="openreplay" data-replay="'+value+'" href="#">'+value+'</a></li>');
+        });
+    });
+
+    // refresh the list of stringtables
+    request("04", "", function(data) {
+        $("#stringtable-list").html(""); // reset
+        $.each(data.data, function(name, subs) {
+            $("#stringtable-list").append('<optgroup label="'+name+'">');
+            $.each(subs, function(id, sub){
+                 $("#stringtable-list").append('<option>'+sub+'</option>');
+            });
+            $("#stringtable-list").append('</optgroup>');
+        });
+    });
+
+    // refresh the list of entities
+    request("06", "", function(data) {
+        data.data.sort(function(a, b) { return a[1] > b[1] ? 1 : -1; });
+        $("#entity-list").html("");
+
+        $.each(data.data, function(id, val) {
+            $("#entity-list").append('<option value="'+val[0]+'">'+val[1]+' - ('+val[0]+')</option>');
+        });
+    });
+}
+
 // initialize page
 $(function () {
     // register onClose for all tabs
@@ -71,6 +105,7 @@ $(function () {
         request("01", attr, function(data) {
             $("#openpath").val(attr);
             $.bootstrapGrowl(data.data);
+            refresh();
         });
     });
 
@@ -78,6 +113,7 @@ $(function () {
     $("#btnparse").click(function() {
         request("02", $("#parsecount").val(), function(data) {
             $.bootstrapGrowl(data.data);
+            refresh();
         });
     });
 
@@ -86,6 +122,7 @@ $(function () {
         var attr = $("#openmenu").val();
         request("01", attr, function(data) {
             $.bootstrapGrowl(data.data);
+            refresh();
         });
     });
 
@@ -94,16 +131,13 @@ $(function () {
         request("03", "", function(data) {
             $("#openpath").val("");
             $.bootstrapGrowl(data.data);
+            refresh();
         });
     });
 
     // add the about tab
     addTab("About", $("#about-view").html());
 
-    // get a list of loadable replays
-    request("00", "", function(data) {
-        $.each(data.data, function(index, value) {
-            $("#openmenu").append('<li><a class="openreplay" data-replay="'+value+'" href="#">'+value+'</a></li>');
-        });
-    });
+    // refresh content
+    refresh();
 });
