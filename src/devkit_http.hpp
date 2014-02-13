@@ -74,6 +74,19 @@ namespace dota {
                 status.clock = clock;
                 status.heroes = heroes;
             }
+
+            /** clears values */
+            void clear() {
+                status.mode = 0;
+                status.state = 0;
+                status.clock = "00:00";
+                status.heroes = {"","","","","","","","","",""};
+
+                mode = status.mode;
+                state = status.state;
+                clock = status.clock;
+                heroes = status.heroes;
+            }
         private:
             /** game status var's to update */
             uint32_t mode;

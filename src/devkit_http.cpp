@@ -185,8 +185,10 @@ namespace dota {
             (*session)([=](devkit_session &s) {
                 std::lock_guard<std::mutex> mLock(s.delLock);
 
-                if (s.r)
+                if (s.r) {
                     delete s.r;
+                    s.clear();
+                }
 
                 try {
                     s.r = new reader(file);
@@ -247,6 +249,7 @@ namespace dota {
                 if (s.r) {
                     delete s.r;
                     s.r = nullptr;
+                    s.clear();
                 }
             });
 
