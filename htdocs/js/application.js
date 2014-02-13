@@ -74,6 +74,34 @@ var flags = [
     }
 ];
 
+var modes = [
+    "-- Unkown --",
+    "All Pick",
+    "Captains Mode",
+    "Random Draft",
+    "Single Draft",
+    "All Random",
+    "Introduction",
+    "Diretide",
+    "Reverse Captains Mode",
+    "Greeviling",
+    "Tutorial",
+    "Mid Only",
+    "Least Played",
+    "New Player Pool",
+    "Compendium Match"
+];
+
+var states = [
+    "-- Unkown --", // none state
+    "Loading",
+    "Picking",
+    "-- Unkown --", // strategy state
+    "Pregame",
+    "Playing",
+    "Postgame"
+];
+
 // shows a specific tab
 function switchToTab(tabId) {
     $('#tabs a[href="#' + tabId + '"]').tab('show');
@@ -193,8 +221,14 @@ $(function () {
         request("08", "", function(data) {
             $("#openpath").val(data.data.file);
             $("#status-tick").val(data.data.ticks);
-            $("#status-score").val(data.data.score);
+            $("#status-mode").val(modes[data.data.mode]);
+            $("#status-state").val(states[data.data.state]);
             $("#status-time").val(data.data.time);
+
+            $("#heroicons").html("");
+            $.each(data.data.picks, function(index, key) {
+                $("#heroicons").append('<img height="28" src="images/icons/'+key.toLowerCase()+'.png" />');
+            });
         });
     }
 
@@ -323,10 +357,10 @@ $(function () {
     // --- Setup ---
 
     // hide the control panel by default
-    //$("#control").toggle();
+    $("#control").toggle();
 
     // add the about tab
-    //addTab("About", $("#about-view").html());
+    addTab("About", $("#about-view").html());
 
     // refresh content
     refresh();

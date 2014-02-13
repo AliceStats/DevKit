@@ -62,7 +62,7 @@ namespace dota {
             sessionMutex.lock();
             auto it = sessions.find(session);
             if (it == sessions.end()) {
-                sessions[session] = new monitor<devkit_session>( devkit_session{time(NULL), nullptr, {}} );
+                sessions[session] = std::shared_ptr<monitor<devkit_session>> (new monitor<devkit_session>(devkit_session{}));
             } else {
                 (*it->second)([](devkit_session &s){
                     s.accessed = time(NULL);
@@ -138,7 +138,7 @@ namespace dota {
         return r;
     }
 
-    monitor<http_request_handler_devkit::devkit_session>* http_request_handler_devkit::getSession(uint32_t id) {
+    std::shared_ptr<monitor<devkit_session>> http_request_handler_devkit::getSession(uint32_t id) {
         std::lock_guard<std::mutex> mLock(sessionMutex);
 
         auto it = sessions.find(id);
@@ -183,12 +183,21 @@ namespace dota {
         try {
             // open a new replay
             (*session)([=](devkit_session &s) {
+                std::lock_guard<std::mutex> mLock(s.delLock);
+
                 if (s.r)
                     delete s.r;
 
-                s.r = new reader(file);
-                s.status = game_status(); // reset current status
-                s.status.file = arg;
+                try {
+                    s.r = new reader(file);
+                    s.status = game_status(); // reset current status
+                    s.status.file = arg;
+                    s.bind();
+                } catch (std::exception &e) {
+                    // race condition if reader can't be opened here and we don't catch it
+                    s.r = nullptr;
+                    throw e;
+                }
             }).get();
 
             return retOk(std::string("Replay Opened"));
@@ -216,6 +225,7 @@ namespace dota {
                         s.r->readMessage();
                     }
                     s.status.ticksParsed += num;
+                    s.update();
                 }
             });
 
@@ -232,6 +242,8 @@ namespace dota {
 
         try {
             (*session)([=](devkit_session &s) {
+                std::lock_guard<std::mutex> mLock(s.delLock);
+
                 if (s.r) {
                     delete s.r;
                     s.r = nullptr;
@@ -369,7 +381,8 @@ namespace dota {
                 entries["time"] = s.status.clock;
                 entries["picks"] = s.status.heroes;
                 entries["file"] = s.status.file;
-                entries["score"] = s.status.score;
+                entries["state"] = s.status.state;
+                entries["mode"] = s.status.mode;
 
                 return entries;
             });
