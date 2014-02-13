@@ -227,7 +227,8 @@ $(function () {
 
             $("#heroicons").html("");
             $.each(data.data.picks, function(index, key) {
-                $("#heroicons").append('<img height="28" src="images/icons/'+key.toLowerCase()+'.png" />');
+                if (key !== "")
+                    $("#heroicons").append('<img height="28" src="images/icons/'+key.toLowerCase()+'.png" />');
             });
         });
     }
@@ -255,12 +256,12 @@ $(function () {
                     $(this).appendTo($(this).parent().find(".hidden"));
                 }
             } else {
-                if (filter === "" || $(this).parent().hasClass("hidden")) {
-                    var group = $(this).attr("data-group");
-                    if (!group)
-                        $(this).appendTo($(this).parent().parent());
-                    else
-                        $(this).insertAfter($("#group-"+group));
+                if (filter === "" && $(this).parent().hasClass("hidden")) {
+                        var group = $(this).attr("data-group");
+                        if (!group)
+                            $(this).appendTo($(this).parent().parent());
+                        else ($(this).parent().hasClass("hidden"))
+                            $(this).insertAfter($("#group-"+group));
                 }
             }
         });
@@ -350,6 +351,15 @@ $(function () {
             var name = $(this).html();
             request("07", id, function (data) {
                 addTab("Entity "+name, entityTpl(data), "entity-tab", id);
+                $(".tablesorter-bootstrap").tablesorter(
+                    {
+                        widgets: ["zebra", "filter"],
+                        widgetOptions : {
+                            filter_cssFilter: 'form-control',
+                        }
+                    }
+                );
+                $(".tablesorter-bootstrap").trigger("update");
             });
         });
     });
