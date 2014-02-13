@@ -204,6 +204,9 @@ $(function () {
         var target = "#"+$(this).attr("data-target")+" option";
         var filter = $(this).val().toLowerCase();
 
+        // unselect hidden props if any
+        $("#"+$(this).attr("data-target")).find("option").attr("selected", false);
+
         // Still slow for stringtables,
         // TODO: Test this on older hardware to see if this is a problem
 
@@ -254,6 +257,7 @@ $(function () {
     // toggle control board
     $("#toggle-control").click(function() {
         $("#control").toggle();
+        return false;
     });
 
     // add about tab
