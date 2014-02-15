@@ -306,11 +306,13 @@ namespace dota {
                     return entries;
 
                 gamestate::entityMap &entities = s.r->getState().getEntities();
-                for (auto &ent : entities) {
-                    std::vector<json_type> sub;
-                    sub.push_back(ent.first);
-                    sub.push_back(ent.second->getClassName());
-                    entries.push_back(std::move(sub));
+                for (uint32_t i = 0; i < entities.size(); ++i) {
+                    if (entities[i] != nullptr) {
+                        std::vector<json_type> sub;
+                        sub.push_back(i);
+                        sub.push_back(entities[i]->getClassName());
+                        entries.push_back(std::move(sub));
+                    }
                 }
 
                 return entries;
@@ -344,18 +346,20 @@ namespace dota {
 
                 gamestate::entityMap &entities = s.r->getState().getEntities();
 
-                auto e = entities.find(id);
-                if (e != entities.end()) {
-                    for (auto it : *(e->second)) {
-                        std::unordered_map<std::string, json_type> entry;
-                        sendprop *p = it.second.getSendprop();
+                auto e = entities[id];
+                if (e != nullptr) {
+                    for (auto it : *e) {
+                        if (it.isInitialized()) {
+                            std::unordered_map<std::string, json_type> entry;
+                            sendprop *p = it.getSendprop();
 
-                        entry["name"] = it.second.getName();
-                        entry["value"] = it.second.asString();
-                        entry["type"] = it.second.getType();
-                        entry["flags"] = p->getFlags();
+                            entry["name"] = it.getName();
+                            entry["value"] = it.asString();
+                            entry["type"] = it.getType();
+                            entry["flags"] = p->getFlags();
 
-                        entries.push_back(entry);
+                            entries.push_back(entry);
+                        }
                     }
                 }
 

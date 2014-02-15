@@ -60,11 +60,17 @@ namespace dota {
 
             /** binds reader handler to targets */
             void bind() {
+                // register for status update
+                handlerRegisterCallback(r->getHandler(), msgStatus, reader::REPLAY_FLATTABLES, devkit_session, handleReady)
+            }
+
+            /** Callback when flattables are available */
+            void handleReady(handlerCbType(msgStatus) msg) {
                 // required for game time
-                handlerRegisterCallback(r->getHandler(), msgEntity, "CDOTAGamerulesProxy", devkit_session, handleState);
+                handlerRegisterCallback(r->getHandler(), msgEntity, r->getState().getEntityIdFor("CDOTAGamerulesProxy"), devkit_session, handleState);
 
                 // required to get picked heroes
-                handlerRegisterCallback(r->getHandler(), msgEntity, "CDOTA_PlayerResource", devkit_session, handlePlayer);
+                handlerRegisterCallback(r->getHandler(), msgEntity, r->getState().getEntityIdFor("CDOTA_PlayerResource"), devkit_session, handlePlayer);
             }
 
             /** updates game status */
@@ -101,8 +107,8 @@ namespace dota {
                 auto GameMode = msg->msg->find("DT_DOTAGamerules.m_iGameMode");         // Game Mode
                 auto GameState = msg->msg->find("DT_DOTAGamerules.m_nGameState");       // Game State
 
-                float cur = GameTime->second.as<FloatProperty>();
-                float start = GameStart->second.as<FloatProperty>();
+                float cur = GameTime->as<FloatProperty>();
+                float start = GameStart->as<FloatProperty>();
 
                 if ((start > 1)) {
                     char c[6];
@@ -114,8 +120,8 @@ namespace dota {
                     clock = c;
                 }
 
-                mode = GameMode->second.as<IntProperty>();
-                state = GameState->second.as<IntProperty>();
+                mode = GameMode->as<IntProperty>();
+                state = GameState->as<IntProperty>();
             }
 
             void handlePlayer(handlerCbType(msgEntity) msg) {
@@ -127,13 +133,13 @@ namespace dota {
                 for (int i = 0; i < 10; ++i) {
                     // get hero entity
                     auto hero = msg->msg->find(std::string("m_hSelectedHero.000")+std::to_string(i));
-                    int entityId = (hero->second.as<IntProperty>() & 0x7FF);
+                    int entityId = (hero->as<IntProperty>() & 0x7FF);
 
                     if (r != nullptr) {
                         gamestate::entityMap &entities = r->getState().getEntities();
-                        auto e = entities.find(entityId);
-                        if (e != entities.end()) {
-                            heroes[i] = e->second->getClassName().substr(16); // only last part
+                        auto e = entities[entityId];
+                        if (e != nullptr) {
+                            heroes[i] = e->getClassName().substr(16); // only last part
                         }
                     }
                 }
