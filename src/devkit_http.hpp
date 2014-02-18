@@ -8,9 +8,7 @@
 #include <ctime>
 #include <cstdio>
 
-#include <alice/reader.hpp>
-#include <alice/monitor.hpp>
-#include <alice/handler.hpp>
+#include <alice/alice.hpp>
 
 #include "http_reply.hpp"
 #include "http_request.hpp"
@@ -19,6 +17,9 @@
 #include "json.hpp"
 
 #include "config.hpp"
+
+// typedef for the parser we use
+typedef dota::parser<dota::dem_stream_file> parser_t;
 
 namespace dota {
     /** Contains values returned by the STATUS Api call */
@@ -46,31 +47,31 @@ namespace dota {
             /** Last time session was accessed */
             time_t accessed;
             /** Replay reader */
-            reader* r;
+            parser_t* p;
             /** delete lock for the reader to give the handler the time to finish */
             std::mutex delLock;
             /** Status struct */
             game_status status;
 
             devkit_session()
-                : accessed(time(NULL)), r(nullptr), delLock(), status(game_status()), heroes{"","","","","","","","","",""} {}
+                : accessed(time(NULL)), p(nullptr), delLock(), status(game_status()), heroes{"","","","","","","","","",""} {}
 
             devkit_session(const devkit_session& s)
-                : accessed(s.accessed), r(s.r), delLock(), status(s.status), heroes{"","","","","","","","","",""} {}
+                : accessed(s.accessed), p(s.p), delLock(), status(s.status), heroes{"","","","","","","","","",""} {}
 
             /** binds reader handler to targets */
             void bind() {
                 // register for status update
-                handlerRegisterCallback(r->getHandler(), msgStatus, reader::REPLAY_FLATTABLES, devkit_session, handleReady)
+                handlerRegisterCallback(p->getHandler(), msgStatus, REPLAY_FLATTABLES, devkit_session, handleReady)
             }
 
             /** Callback when flattables are available */
             void handleReady(handlerCbType(msgStatus) msg) {
                 // required for game time
-                handlerRegisterCallback(r->getHandler(), msgEntity, r->getState().getEntityIdFor("CDOTAGamerulesProxy"), devkit_session, handleState);
+                handlerRegisterCallback(p->getHandler(), msgEntity, p->getEntityIdFor("CDOTAGamerulesProxy"), devkit_session, handleState);
 
                 // required to get picked heroes
-                handlerRegisterCallback(r->getHandler(), msgEntity, r->getState().getEntityIdFor("CDOTA_PlayerResource"), devkit_session, handlePlayer);
+                handlerRegisterCallback(p->getHandler(), msgEntity, p->getEntityIdFor("CDOTA_PlayerResource"), devkit_session, handlePlayer);
             }
 
             /** updates game status */
@@ -133,13 +134,13 @@ namespace dota {
                 for (int i = 0; i < 10; ++i) {
                     // get hero entity
                     auto hero = msg->msg->find(std::string("m_hSelectedHero.000")+std::to_string(i));
-                    int entityId = (hero->as<IntProperty>() & 0x7FF);
+                    int entityId = (hero->as<UIntProperty>() & 0x7FF);
 
-                    if (r != nullptr) {
-                        gamestate::entityMap &entities = r->getState().getEntities();
+                    if (p != nullptr) {
+                        parser_t::entityMap &entities = p->getEntities();
                         auto e = entities[entityId];
-                        if (e != nullptr) {
-                            heroes[i] = e->getClassName().substr(16); // only last part
+                        if (e.isInitialized()) {
+                            heroes[i] = e.getClassName().substr(16); // only last part
                         }
                     }
                 }
@@ -166,7 +167,7 @@ namespace dota {
 
             /** Constructor, takes replay directory */
             http_request_handler_devkit(std::string replayDirectory)
-                : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory), count(0) { }
+                : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory), count(0), setDef{0,0,0,0,1,{},1,1,0,{}} { }
 
             /** Destructor */
             virtual ~http_request_handler_devkit() { }
@@ -187,6 +188,8 @@ namespace dota {
             std::unordered_map<uint32_t, std::shared_ptr<monitor<devkit_session>>> sessions;
             /** mutex for locking / unlocking the session map */
             std::mutex sessionMutex;
+            /** default settings */
+            settings setDef;
 
             /** Returns result of LIST API call */
             std::string methodList();

@@ -16,7 +16,7 @@ MESSAGE ( STATUS "Host system is " ${CMAKE_HOST_SYSTEM} " with processor " ${CMA
 MESSAGE ( STATUS "Target system is " ${CMAKE_SYSTEM} " with processor " ${CMAKE_SYSTEM_PROCESSOR} )
 
 # Build unit tests
-OPTION (BUILD_TEST "Build unit tests, requires Boost.Test library" OFF) 
+OPTION (BUILD_TEST "Build unit tests, requires Boost.Test library" OFF)
 
 # Set a custom htdocs path
 OPTION (CUSTOM_HTDOCS_PATH "Custom htdocs path, default is INSTALL_PREFIX/share/alice/htdocs" OFF)
@@ -28,7 +28,7 @@ OPTION (CUSTOM_HTDOCS_PATH "Custom htdocs path, default is INSTALL_PREFIX/share/
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   SET ( CMAKE_CXX_FLAGS "-O3 --std=c++0x -fPIC -Wall --stdlib=libc++" )
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  SET ( CMAKE_CXX_FLAGS "-O3 --std=c++0x -fPIC -Wall" )
+  SET ( CMAKE_CXX_FLAGS "-g -O3 --std=c++0x -fPIC -Wall" )
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   MESSAGE ( STATUS "Intel Compiler not tested yet, falling back to default compiler flags" )
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -57,33 +57,33 @@ CONFIGURE_FILE (
 #------------------------------------------------------------
 
 IF ( UNIX )
-    # Boost headers / librarys 
+    # Boost headers / librarys
     IF ( BUILD_TEST )
         find_package (Boost COMPONENTS system unit_test_framework REQUIRED)
     ELSE ( BUILD_TEST )
         find_package ( Boost COMPONENTS system REQUIRED )
     ENDIF ( BUILD_TEST )
-    
+
     include( FindAlice )
     find_package ( Alice REQUIRED )
-    
+
     include_directories( ${Boost_INCLUDE_DIRS} ${ALICE_INCLUDE_DIR} )
 ELSE ( UNIX )
-    # Boost headers / librarys 
+    # Boost headers / librarys
     IF ( EXISTS ${CMAKE_SOURCE_DIR}/deps/boost-1.55.0 )
         SET ( BOOST_ROOT ${CMAKE_SOURCE_DIR}/deps/boost-1.55.0 )
     ENDIF ( EXISTS ${CMAKE_SOURCE_DIR}/deps/boost-1.55.0 )
-    
+
    IF ( BUILD_TEST )
         find_package (Boost COMPONENTS system unit_test_framework REQUIRED)
     ELSE ( BUILD_TEST )
         find_package ( Boost COMPONENTS system REQUIRED )
     ENDIF ( BUILD_TEST )
-    
+
     # TODO: Set default path for windows installation on alice
     include( FindAlice )
     find_package ( Alice REQUIRED )
-    
+
     include_directories( ${Boost_INCLUDE_DIRS} ${ALICE_INCLUDE_DIR} )
 ENDIF ( UNIX )
 
@@ -114,6 +114,7 @@ ADD_EXECUTABLE ( alice-devkit
 TARGET_LINK_LIBRARIES ( alice-devkit
     ${ALICE_LIBRARIES}
 	${Boost_LIBRARIES}
+	protobuf
 )
 
 IF ( UNIX )
@@ -121,5 +122,5 @@ IF ( UNIX )
     TARGET_LINK_LIBRARIES ( alice-devkit pthread )
 ENDIF ( UNIX )
 
-INSTALL( TARGETS alice-devkit RUNTIME DESTINATION bin )
-INSTALL( DIRECTORY htdocs DESTINATION ${CMAKE_INSTALL_PREFIX}/share/alice/htdocs/ )
+INSTALL( TARGETS alice-devkit RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
+INSTALL( DIRECTORY htdocs DESTINATION ${CMAKE_INSTALL_PREFIX}/share/alice )

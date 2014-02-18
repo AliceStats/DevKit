@@ -185,19 +185,20 @@ namespace dota {
             (*session)([=](devkit_session &s) {
                 std::lock_guard<std::mutex> mLock(s.delLock);
 
-                if (s.r) {
-                    delete s.r;
+                if (s.p) {
+                    delete s.p;
                     s.clear();
                 }
 
                 try {
-                    s.r = new reader(file);
+                    s.p = new parser_t(setDef);
+                    s.p->open(file);
                     s.status = game_status(); // reset current status
                     s.status.file = arg;
                     s.bind();
                 } catch (std::exception &e) {
                     // race condition if reader can't be opened here and we don't catch it
-                    s.r = nullptr;
+                    s.p = nullptr;
                     throw e;
                 }
             }).get();
@@ -220,16 +221,18 @@ namespace dota {
             if (!session)
                 return retFail(std::string("No session active"));
 
+            // This could potentally be run without explicitly getting the future,
+            // the problem is that it wouldn't propagate any exceptions thrown.
             (*session)([=](devkit_session &s) {
                 // don't parse if there is no reader
-                if (s.r) {
+                if (s.p) {
                     for (uint32_t i = 0; i < num; ++i) {
-                        s.r->readMessage();
+                        s.p->read();
                     }
                     s.status.ticksParsed += num;
                     s.update();
                 }
-            });
+            }).get();
 
             return retOk(std::string("Parsing..."));
         } catch (std::exception &e) {
@@ -246,9 +249,9 @@ namespace dota {
             (*session)([=](devkit_session &s) {
                 std::lock_guard<std::mutex> mLock(s.delLock);
 
-                if (s.r) {
-                    delete s.r;
-                    s.r = nullptr;
+                if (s.p) {
+                    delete s.p;
+                    s.p = nullptr;
                     s.clear();
                 }
             });
@@ -269,15 +272,15 @@ namespace dota {
                 std::unordered_map<std::string, json_type> entries;
 
                 // if there is no reader, this function returns an empty set
-                if (!s.r)
+                if (!s.p)
                     return entries;
 
-                gamestate::stringtableMap &tables = s.r->getState().getStringtables();
+                parser_t::stringtableMap &tables = s.p->getStringtables();
                 for (auto &tbl : tables) {
                     std::vector<json_type> sub;
 
-                    for (auto &s : tbl.value) {
-                        sub.push_back(s.key);
+                    for (auto &ss : tbl.value) {
+                        sub.push_back(ss.key);
                     }
 
                     entries[tbl.key] = sub;
@@ -302,15 +305,15 @@ namespace dota {
                 std::vector<json_type> entries;
 
                 // returns an empty set if no replay is opened
-                if (!s.r)
+                if (!s.p)
                     return entries;
 
-                gamestate::entityMap &entities = s.r->getState().getEntities();
+                parser_t::entityMap &entities = s.p->getEntities();
                 for (uint32_t i = 0; i < entities.size(); ++i) {
-                    if (entities[i] != nullptr) {
+                    if (entities[i].isInitialized()) {
                         std::vector<json_type> sub;
                         sub.push_back(i);
-                        sub.push_back(entities[i]->getClassName());
+                        sub.push_back(entities[i].getClassName());
                         entries.push_back(std::move(sub));
                     }
                 }
@@ -341,14 +344,14 @@ namespace dota {
             auto ret = (*session)([=](devkit_session &s) {
                 std::vector<json_type> entries;
 
-                if (!s.r)
+                if (!s.p)
                     return entries;
 
-                gamestate::entityMap &entities = s.r->getState().getEntities();
+                parser_t::entityMap &entities = s.p->getEntities();
 
                 auto e = entities[id];
-                if (e != nullptr) {
-                    for (auto it : *e) {
+                if (e.isInitialized()) {
+                    for (auto it : e) {
                         if (it.isInitialized()) {
                             std::unordered_map<std::string, json_type> entry;
                             sendprop *p = it.getSendprop();
@@ -381,7 +384,7 @@ namespace dota {
             auto ret = (*session)([=](devkit_session &s) {
                 std::unordered_map<std::string, json_type> entries;
 
-                if (!s.r)
+                if (!s.p)
                     return entries;
 
                 entries["ticks"] = s.status.ticksParsed;
@@ -409,10 +412,10 @@ namespace dota {
             auto ret = (*session)([=](devkit_session &s) {
                 std::unordered_map<std::string, json_type> entries;
 
-                if (!s.r)
+                if (!s.p)
                     return entries;
 
-                gamestate::sendtableMap &tbls = s.r->getState().getSendtables();
+                parser_t::sendtableMap &tbls = s.p->getSendtables();
 
                 for (auto &it : tbls) {
                     std::vector<json_type> props;
@@ -453,10 +456,10 @@ namespace dota {
             auto ret = (*session)([=](devkit_session &s) {
                 std::unordered_map<std::string, json_type> entries;
 
-                if (!s.r)
+                if (!s.p)
                     return entries;
 
-                gamestate::flatMap &tbls = s.r->getState().getFlattables();
+                parser_t::flatMap &tbls = s.p->getFlattables();
 
                 for (auto &it : tbls) {
                     std::vector<json_type> props;
