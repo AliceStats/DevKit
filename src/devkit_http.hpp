@@ -19,7 +19,7 @@
 #include "config.hpp"
 
 // typedef for the parser we use
-typedef dota::parser<dota::dem_stream_file> parser_t;
+typedef dota::parser parser_t;
 
 namespace dota {
     /** Contains values returned by the STATUS Api call */

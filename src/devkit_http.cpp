@@ -191,7 +191,7 @@ namespace dota {
                 }
 
                 try {
-                    s.p = new parser_t(setDef);
+                    s.p = new parser_t(setDef, new dem_stream_file);
                     s.p->open(file);
                     s.status = game_status(); // reset current status
                     s.status.file = arg;
