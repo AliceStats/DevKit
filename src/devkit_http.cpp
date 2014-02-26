@@ -356,7 +356,7 @@ namespace dota {
                             std::unordered_map<std::string, json_type> entry;
                             sendprop *p = it.getSendprop();
 
-                            entry["name"] = it.getName();
+                            entry["name"] = it.getFlatName();
                             entry["value"] = it.asString();
                             entry["type"] = it.getType();
                             entry["flags"] = p->getFlags();
