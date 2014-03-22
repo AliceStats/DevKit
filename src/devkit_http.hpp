@@ -167,7 +167,7 @@ namespace dota {
 
             /** Constructor, takes replay directory */
             http_request_handler_devkit(std::string replayDirectory)
-                : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory), count(0), setDef{0,0,0,0,1,{},1,1,0,{}} { }
+                : htdocs(DEVKIT_HTDOCS), replaydir(replayDirectory), count(0), setDef{0,0,0,0,1,{},1,0,1,0,{}} { }
 
             /** Destructor */
             virtual ~http_request_handler_devkit() { }
