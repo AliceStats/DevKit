@@ -356,7 +356,7 @@ namespace dota {
                             std::unordered_map<std::string, json_type> entry;
                             sendprop *p = it.getSendprop();
 
-                            entry["name"] = it.getFlatName();
+                            entry["name"] = it.getName();
                             entry["value"] = it.asString();
                             entry["type"] = it.getType();
                             entry["flags"] = p->getFlags();
@@ -465,18 +465,18 @@ namespace dota {
                     std::vector<json_type> props;
                     for (auto &t : it.second.properties) {
                         std::unordered_map<std::string, json_type> entry;
-                        std::bitset<32> flagset(t->getFlags());
+                        std::bitset<32> flagset(t.prop->getFlags());
 
-                        entry["type"] = t->getType();
-                        entry["name"] = t->getName();
-                        entry["netname"] = t->getNetname();
+                        entry["type"] = t.prop->getType();
+                        entry["name"] = t.prop->getName();
+                        entry["netname"] = t.prop->getNetname();
                         entry["flags"] = flagset.to_string();
-                        entry["priority"] = t->getPriority();
-                        entry["classname"] = t->getClassname();
-                        entry["elements"] = t->getElements();
-                        entry["min"] = t->getLowVal();
-                        entry["max"] = t->getHighVal();
-                        entry["bits"] = t->getBits();
+                        entry["priority"] = t.prop->getPriority();
+                        entry["classname"] = t.prop->getClassname();
+                        entry["elements"] = t.prop->getElements();
+                        entry["min"] = t.prop->getLowVal();
+                        entry["max"] = t.prop->getHighVal();
+                        entry["bits"] = t.prop->getBits();
 
                         props.push_back(entry);
                     }

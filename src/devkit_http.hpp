@@ -103,10 +103,10 @@ namespace dota {
 
             /** Extract game state */
             void handleState(handlerCbType(msgEntity) msg) {
-                auto GameTime = msg->msg->find("DT_DOTAGamerules.m_fGameTime");         // current time
-                auto GameStart = msg->msg->find("DT_DOTAGamerules.m_flGameStartTime");  // time when clock reached 0
-                auto GameMode = msg->msg->find("DT_DOTAGamerules.m_iGameMode");         // Game Mode
-                auto GameState = msg->msg->find("DT_DOTAGamerules.m_nGameState");       // Game State
+                auto GameTime = msg->msg->find(".dota_gamerules_data.m_fGameTime");         // current time
+                auto GameStart = msg->msg->find(".dota_gamerules_data.m_flGameStartTime");  // time when clock reached 0
+                auto GameMode = msg->msg->find(".dota_gamerules_data.m_iGameMode");         // Game Mode
+                auto GameState = msg->msg->find(".dota_gamerules_data.m_nGameState");       // Game State
 
                 float cur = GameTime->as<FloatProperty>();
                 float start = GameStart->as<FloatProperty>();
@@ -133,7 +133,7 @@ namespace dota {
 
                 for (int i = 0; i < 10; ++i) {
                     // get hero entity
-                    auto hero = msg->msg->find(std::string("m_hSelectedHero.000")+std::to_string(i));
+                    auto hero = msg->msg->find(std::string(".m_hSelectedHero.000")+std::to_string(i));
                     int entityId = (hero->as<UIntProperty>() & 0x7FF);
 
                     if (p != nullptr) {
