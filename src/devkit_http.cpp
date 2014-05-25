@@ -463,7 +463,7 @@ namespace dota {
 
                 for (auto &it : tbls) {
                     std::vector<json_type> props;
-                    for (auto &t : it.second.properties) {
+                    for (auto &t : it.properties) {
                         std::unordered_map<std::string, json_type> entry;
                         std::bitset<32> flagset(t.prop->getFlags());
 
@@ -480,7 +480,7 @@ namespace dota {
 
                         props.push_back(entry);
                     }
-                    entries[it.second.name] = props;
+                    entries[it.name] = props;
                 }
 
                 return entries;
