@@ -16,7 +16,10 @@ namespace dota {
 
         // scripts
         { "js", "text/javascript" },
-        { "css", "text/css" }
+        { "css", "text/css" },
+
+        // data
+        { "json", "application/json" }
     };
 
     /** Mime type to use if file extension is not known */

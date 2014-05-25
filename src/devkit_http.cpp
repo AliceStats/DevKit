@@ -111,6 +111,7 @@ namespace dota {
             }
 
             r.fields.push_back({"Content-Length", std::to_string(r.body.size())});
+            r.fields.push_back({"Content-Type", http_mime_type::retrieveFromPath(".json")});
             r.fields.push_back({"Connection", "Close"});
         } else {
             // add index.html if path ends in slash
