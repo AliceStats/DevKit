@@ -111,6 +111,7 @@ namespace dota {
             }
 
             r.fields.push_back({"Content-Length", std::to_string(r.body.size())});
+            r.fields.push_back({"Content-Type", http_mime_type::retrieveFromPath(".json")});
             r.fields.push_back({"Connection", "Close"});
         } else {
             // add index.html if path ends in slash
@@ -463,7 +464,7 @@ namespace dota {
 
                 for (auto &it : tbls) {
                     std::vector<json_type> props;
-                    for (auto &t : it.second.properties) {
+                    for (auto &t : it.properties) {
                         std::unordered_map<std::string, json_type> entry;
                         std::bitset<32> flagset(t.prop->getFlags());
 
@@ -480,7 +481,7 @@ namespace dota {
 
                         props.push_back(entry);
                     }
-                    entries[it.second.name] = props;
+                    entries[it.name] = props;
                 }
 
                 return entries;
