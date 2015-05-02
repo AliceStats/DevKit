@@ -1,12 +1,12 @@
 # Find alice
 
 find_path( ALICE_INCLUDE_DIR
-    NAMES alice/reader.hpp
+    NAMES alice/parser.hpp
     HINTS ${ALICE_ROOT}include ${CMAKE_INCLUDE_PATH}
 )
 
 find_library( ALICE_LIBRARIES
-    NAMES alice-core-shared
+    NAMES alice-core-static
     HINTS ${ALICE_ROOT}/lib ${CMAKE_LIBRARY_PATH}
 )
 
