@@ -113,8 +113,8 @@ ADD_EXECUTABLE ( alice-devkit
 
 TARGET_LINK_LIBRARIES ( alice-devkit
     ${ALICE_LIBRARIES}
-	${Boost_LIBRARIES}
-	protobuf
+    ${Boost_LIBRARIES}
+    protobuf
 )
 
 IF ( UNIX )
