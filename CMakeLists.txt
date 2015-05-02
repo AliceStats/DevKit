@@ -67,7 +67,8 @@ IF ( UNIX )
     include( FindAlice )
     find_package ( Alice REQUIRED )
 
-    include_directories( ${Boost_INCLUDE_DIRS} ${ALICE_INCLUDE_DIR} )
+    include_directories( ${Boost_INCLUDE_DIRS} ${ALICE_INCLUDE_DIR} /usr/local/include )
+    link_directories( /usr/local/lib )
 ELSE ( UNIX )
     # Boost headers / librarys
     IF ( EXISTS ${CMAKE_SOURCE_DIR}/deps/boost-1.55.0 )
@@ -115,6 +116,7 @@ TARGET_LINK_LIBRARIES ( alice-devkit
     ${ALICE_LIBRARIES}
     ${Boost_LIBRARIES}
     protobuf
+    snappy
 )
 
 IF ( UNIX )
